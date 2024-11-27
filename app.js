@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const sequelize = require('./config/database');
 
+const connectMongoose = require('./config/mongoose');
+const serviceRequestRoutes = require('./routes/serviceRequests');
+
 const cors = require('cors');
 
 
@@ -326,6 +329,7 @@ sequelize
   .sync()
   .then(() => {
     console.log('Database synchronized');
+    await connectMongoose();
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
