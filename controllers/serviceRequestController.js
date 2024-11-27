@@ -63,7 +63,7 @@ exports.addServiceRequest = async (req, res) => {
     }
 
     // Add to currentOrders
-    farmer.currentOrders.push(newServiceRequest.RequestID);
+    farmer.currentServiceRequests.push(newServiceRequest.RequestID);
     await farmer.save();
 
     // Commit the transaction
