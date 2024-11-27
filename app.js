@@ -3,7 +3,7 @@ const express = require('express');
 const sequelize = require('./config/database');
 
 const connectMongoose = require('./config/mongoose');
-const serviceRequestRoutes = require('./routes/serviceRequests');
+
 
 const cors = require('cors');
 
@@ -84,13 +84,19 @@ app.use(cors({
 const serviceRoutes = require('./routes/serviceRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const serviceProvidersRoute = require('./routes/serviceProviders');
-const equipmentRoute = require('./routes/equipment'); // Ensure this exists
+const equipmentRoute = require('./routes/equipment');
+
 
 // Use routes
 app.use('/api', serviceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/serviceProviders', serviceProvidersRoute);
 app.use('/api/equipment', equipmentRoute);
+
+const serviceRequestRoutes = require('./routes/serviceRequests');
+
+// Routes
+app.use('/api/service-requests', serviceRequestsRoutes);
 
 
 
