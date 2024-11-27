@@ -1,10 +1,8 @@
-
+// models/ServiceRequest.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
 const ServiceProvider = require('./ServiceProvider');
 const Service = require('./Service');
-
 
 const ServiceRequest = sequelize.define('ServiceRequest', {
   RequestID: {
@@ -34,7 +32,6 @@ const ServiceRequest = sequelize.define('ServiceRequest', {
 
   ServiceProviderID: {
     type: DataTypes.STRING,
-    allowNull: false,
     references: {
       model: ServiceProvider,
       key: 'ProviderID',
@@ -42,7 +39,6 @@ const ServiceRequest = sequelize.define('ServiceRequest', {
   },
   ServiceID: {
     type: DataTypes.STRING,
-    allowNull: false,
     references: {
       model: Service,
       key: 'ServiceID',
@@ -51,7 +47,7 @@ const ServiceRequest = sequelize.define('ServiceRequest', {
   Status: {
     type: DataTypes.STRING,
     allowNull: false,
-    defaultValue: 'pending', // Other statuses: 'accepted', 'completed', 'canceled'
+    defaultValue: 'pending',
   },
   Notes: {
     type: DataTypes.TEXT,
@@ -61,5 +57,9 @@ const ServiceRequest = sequelize.define('ServiceRequest', {
   tableName: 'ServiceRequest',
   timestamps: true,
 });
+
+// Associations
+ServiceRequest.belongsTo(ServiceProvider, { foreignKey: 'ServiceProviderID' });
+ServiceRequest.belongsTo(Service, { foreignKey: 'ServiceID' });
 
 module.exports = ServiceRequest;
