@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 
 const ServiceProvider = require('./ServiceProvider');
 const Service = require('./Service');
-const Address = require('./Address');
+
 
 const ServiceRequest = sequelize.define('ServiceRequest', {
   RequestID: {
@@ -31,14 +31,7 @@ const ServiceRequest = sequelize.define('ServiceRequest', {
     type: DataTypes.DATE,
     allowNull: false,
   },
-  AddressID: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Address,
-      key: 'AddressID',
-    },
-  },
+
   ServiceProviderID: {
     type: DataTypes.STRING,
     allowNull: false,
