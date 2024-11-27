@@ -15,7 +15,7 @@ exports.addServiceRequest = async (req, res) => {
     farmerContactInfo,
     farmerAddress,
     scheduledDate,
-    addressId,
+
     serviceProviderId,
     serviceId,
     notes,
@@ -47,7 +47,7 @@ exports.addServiceRequest = async (req, res) => {
         FarmerContactInfo: farmerContactInfo,
         FarmerAddress: farmerAddress,
         ScheduledDate: scheduledDate,
-        AddressID: addressId,
+
         ServiceProviderID: serviceProviderId,
         ServiceID: serviceId,
         Status: 'pending',
