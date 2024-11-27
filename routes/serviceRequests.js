@@ -5,7 +5,7 @@ const serviceRequestController = require('../controllers/serviceRequestControlle
 
 // Route: Add new Service Request
 // POST /api/service-requests/
-router.post('/', serviceRequestController.addServiceRequest);
+router.post('/create-request', serviceRequestController.addServiceRequest);
 
 // Route: Update existing Service Request
 // PUT /api/service-requests/:requestId
