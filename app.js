@@ -323,17 +323,24 @@ app.get('/api/serviceOfferings/:id', async (req, res) => {
 });
 
 
-
-// Start the server after syncing models
-sequelize
-  .sync()
-  .then(() => {
+const startServer = async () => {
+  try {
+    // Synchronize Sequelize models
+    await sequelize.sync();
     console.log('Database synchronized');
+
+    // Connect to MongoDB
     await connectMongoose();
+
+    // Start the Express server
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
-  })
-  .catch((error) => {
-    console.error('Error synchronizing database:', error);
-  });
+  } catch (error) {
+    console.error('Error starting the server:', error);
+    process.exit(1); // Exit process with failure
+  }
+};
+
+// Start the server
+startServer();
