@@ -5,7 +5,7 @@ const ServiceRequest = require('../models/ServiceRequest');
 const ServiceProvider = require('../models/ServiceProvider');
 const Service = require('../models/Service');
 const Address = require('../models/Address');
-const Farmer = require('../models/Farmer');
+const Farmer = require('../models/farmer');
 
 // Add a new Service Request
 exports.addServiceRequest = async (req, res) => {
