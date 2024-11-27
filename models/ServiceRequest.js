@@ -11,11 +11,19 @@ const ServiceRequest = sequelize.define('ServiceRequest', {
     type: DataTypes.STRING,
     primaryKey: true,
   },
+  FarmerID: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   FarmerName: {
     type: DataTypes.STRING,
     allowNull: false,
   },
   FarmerContactInfo: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  FarmerAddress: {
     type: DataTypes.STRING,
     allowNull: false,
   },
