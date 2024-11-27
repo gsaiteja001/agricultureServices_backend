@@ -93,7 +93,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/serviceProviders', serviceProvidersRoute);
 app.use('/api/equipment', equipmentRoute);
 
-const serviceRequestRoutes = require('./routes/serviceRequests');
+const serviceRequestsRoutes = require('./routes/serviceRequests');
 
 // Routes
 app.use('/api/service-requests', serviceRequestsRoutes);
