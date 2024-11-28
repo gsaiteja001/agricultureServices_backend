@@ -403,6 +403,8 @@ const CompletedServiceRequestSchema = new Schema({
   scheduledDate: { type: Date, required: true },
 }, { _id: false });
 
+
+
 // Main Farmer Schema with Upgraded Features
 const FarmerSchema = new Schema({
   farmerId: { type: String, required: true, unique: true, trim: true },
@@ -466,6 +468,12 @@ const FarmerSchema = new Schema({
     required: false,
     default: [] 
   },
+
+  returnedServiceRequests: { 
+  type: [CompletedServiceRequestSchema], 
+  required: false,
+  default: [] 
+},
   
   accountStatus: {
     type: String,
