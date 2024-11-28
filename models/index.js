@@ -38,6 +38,7 @@ Address.belongsTo(ServiceProvider, { foreignKey: 'ProviderID' });
 
 // Export Models
 module.exports = {
+  sequelize,
   ServiceProvider,
   Service,
   ServiceProvider_Service,
