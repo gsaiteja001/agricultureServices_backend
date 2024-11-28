@@ -25,7 +25,7 @@ exports.addServiceRequest = async (req, res) => {
   console.log('receivedserviceProvider',serviceProviderID);
   try {
     const ProviderID = serviceProviderID;
-    console.log('serviceProvider',serviceProviderID);
+    console.log('serviceProvider',ProviderID);
     // Validate ServiceProvider
     const serviceProvider = await ServiceProvider.findByPk(ProviderID, { transaction: t });
     if (!serviceProvider) {
