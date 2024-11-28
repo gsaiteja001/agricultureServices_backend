@@ -15,7 +15,7 @@ exports.addServiceRequest = async (req, res) => {
     farmerContactInfo,
     farmerAddress,
     scheduledDate,
-    serviceProviderId,
+    serviceProviderID,
     serviceId,
     notes,
   } = req.body;
@@ -47,7 +47,7 @@ exports.addServiceRequest = async (req, res) => {
         FarmerAddress: farmerAddress,
         ScheduledDate: scheduledDate,
 
-        ServiceProviderID: serviceProviderId,
+        ServiceProviderID: serviceProviderID,
         ServiceID: serviceId,
         Status: 'Pending', // Ensure consistent casing
         Notes: notes,
@@ -162,11 +162,11 @@ exports.updateServiceRequest = async (req, res) => {
 
 // Get active/completed Service Requests for a ServiceProvider
 exports.getServiceRequestsForProvider = async (req, res) => {
-  const { providerId, status } = req.query; // e.g., /api/service-requests/provider?providerId=123&status=active
+  const { providerID, status } = req.query; // e.g., /api/service-requests/provider?providerId=123&status=active
 
   try {
     // Validate ServiceProvider
-    const serviceProvider = await ServiceProvider.findByPk(providerId);
+    const serviceProvider = await ServiceProvider.findByPk(providerID);
     if (!serviceProvider) {
       throw new Error('Service Provider not found.');
     }
@@ -186,7 +186,7 @@ exports.getServiceRequestsForProvider = async (req, res) => {
     // Fetch ServiceRequests
     const serviceRequests = await ServiceRequest.findAll({
       where: {
-        ServiceProviderID: providerId,
+        ServiceProviderID: providerID,
         ...statusFilter,
       },
       include: [
