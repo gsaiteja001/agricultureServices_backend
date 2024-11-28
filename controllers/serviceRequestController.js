@@ -24,8 +24,9 @@ exports.addServiceRequest = async (req, res) => {
   const t = await sequelize.transaction();
 
   try {
+    const ProviderID = serviceProviderID;
     // Validate ServiceProvider
-    const serviceProvider = await ServiceProvider.findByPk(serviceProviderID, { transaction: t });
+    const serviceProvider = await ServiceProvider.findByPk(ProviderID, { transaction: t });
     if (!serviceProvider) {
       throw new Error('Service Provider not found.');
     }
