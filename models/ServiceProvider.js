@@ -5,6 +5,8 @@ const Address = require('./Address');
 const Equipment = require('./Equipment');
 const Service = require('./Service');
 
+const ServiceProvider_Service = require('./ServiceProvider_Service');
+
 const ServiceProvider = sequelize.define('ServiceProvider', {
   ProviderID: {
     type: DataTypes.STRING,
