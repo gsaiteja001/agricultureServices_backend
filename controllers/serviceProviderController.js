@@ -3,7 +3,7 @@ const ServiceProvider = require('../models/ServiceProvider');
 const Address = require('../models/Address');
 const Equipment = require('../models/Equipment');
 const Service = require('../models/Service');
-
+const sequelize = require('../config/database');
 const Farmer = require('../models/farmer');
 
 module.exports = {
