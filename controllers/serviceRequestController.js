@@ -192,7 +192,7 @@ exports.getServiceRequestsForProvider = async (req, res) => {
       },
       include: [
         { model: Service, attributes: ['ServiceName', 'Category'] },
-        { model: Address },
+ 
       ],
     });
 
@@ -235,7 +235,6 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
       include: [
         { model: ServiceProvider, attributes: ['Name', 'ContactInfo'] },
         { model: Service },
-        { model: Address },
       ],
     });
 
