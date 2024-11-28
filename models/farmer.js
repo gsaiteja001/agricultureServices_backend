@@ -378,29 +378,29 @@ SubscriptionSchema.pre('validate', function(next) {
 
 // Subschema for Current Service Requests
 const CurrentServiceRequestSchema = new Schema({
-  requestID: { type: String, required: true },
-  serviceID: { type: String, required: true },
-  serviceProviderID: { type: String, required: true },
+  requestID: { type: String, required: false },
+  serviceID: { type: String, required: false },
+  serviceProviderID: { type: String, required: false},
   status: { 
     type: String, 
     enum: ['Pending', 'InProgress', 'Assigned'], // Define appropriate statuses
-    required: true 
+    required: false 
   },
-  scheduledDate: { type: Date, required: true },
+  scheduledDate: { type: Date, required: false },
 }, { _id: false });
 
 
 // Subschema for Completed Service Requests
 const CompletedServiceRequestSchema = new Schema({
-  requestID: { type: String, required: true },
-  serviceID: { type: String, required: true },
-  serviceProviderID: { type: String, required: true },
+  requestID: { type: String, required: false },
+  serviceID: { type: String, required: false },
+  serviceProviderID: { type: String, required: false },
   status: { 
     type: String, 
     enum: ['Completed', 'Cancelled'], 
-    required: true 
+    required: false 
   },
-  scheduledDate: { type: Date, required: true },
+  scheduledDate: { type: Date, required: false },
 }, { _id: false });
 
 
