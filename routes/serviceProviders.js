@@ -87,6 +87,9 @@ router.put('/:ProviderID/equipments', serviceProviderController.updateServicePro
 // PUT add or remove Services for a ServiceProvider
 router.put('/:ProviderID/services', serviceProviderController.updateServiceProviderServices);
 
+// PUT update ServiceProvider along with Equipments and Services
+router.put('/update/:ProviderID', serviceProviderController.updateServiceProvider);
+
 
 
 module.exports = router;
