@@ -42,10 +42,14 @@ const ServiceProvider = sequelize.define('ServiceProvider', {
 // Associations
 ServiceProvider.hasMany(Address, { foreignKey: 'ProviderID' });
 ServiceProvider.hasMany(Equipment, { foreignKey: 'OwnedBy' });
+
+// Modify belongsToMany to include timestamps: false
 ServiceProvider.belongsToMany(Service, {
-  through: 'ServiceProvider_Service',
+  through: {
+    model: ServiceProvider_Service,
+    timestamps: false,
+  },
   foreignKey: 'ProviderID',
   otherKey: 'ServiceID',
 });
-
 module.exports = ServiceProvider;
