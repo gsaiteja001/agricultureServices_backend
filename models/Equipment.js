@@ -6,8 +6,9 @@ const ServiceProvider = require('./ServiceProvider');
 
 const Equipment = sequelize.define('Equipment', {
   EquipmentID: {
-    type: DataTypes.STRING,
+    type: DataTypes.UUID,
     primaryKey: true,
+    defaultValue: DataTypes.UUIDV4,
   },
   Name: {
     type: DataTypes.STRING,
