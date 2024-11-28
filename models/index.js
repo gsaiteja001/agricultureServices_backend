@@ -1,28 +1,3 @@
-// const Service = require('./Service');
-// const ServiceProvider = require('./ServiceProvider');
-// const Equipment = require('./Equipment');
-// const Crop = require('./Crop');
-
-// const ServiceProvider_Service = require('./ServiceProvider_Service');
-// const ServiceOffering = require('./ServiceOffering');
-// const ServiceProvider_Equipment = require('./ServiceProvider_Equipment');
-// const Equipment_Crop = require('./Equipment_Crop');
-
-// const Address = require('./Address');
-
-
-// module.exports = {
-//   Service,
-//   ServiceProvider,
-//   Equipment,
-//   Crop,
-//   ServiceProvider_Service,
-//   ServiceOffering,
-//   ServiceProvider_Equipment,
-//   Equipment_Crop,
-//   Address,
-// };
-
 // models/index.js
 
 
@@ -59,9 +34,7 @@ Equipment.belongsTo(ServiceProvider, { foreignKey: 'OwnedBy' });
 ServiceProvider.hasMany(Address, { foreignKey: 'ProviderID' });
 Address.belongsTo(ServiceProvider, { foreignKey: 'ProviderID' });
 
-// ServiceProvider -> Farmer (One-to-Many or One-to-One, depending on your schema)
-ServiceProvider.hasMany(Farmer, { foreignKey: 'ProviderId' });
-Farmer.belongsTo(ServiceProvider, { foreignKey: 'ProviderId' });
+
 
 // Export Models
 module.exports = {
