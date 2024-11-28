@@ -8,6 +8,13 @@ const Address = sequelize.define('Address', {
     primaryKey: true,
     autoIncrement: true,
   },
+  ProviderID: {
+    type: DataTypes.STRING,
+    references: {
+      model: 'ServiceProvider',
+      key: 'ProviderID',
+    },
+  },
   Street: {
     type: DataTypes.STRING,
     allowNull: false,
