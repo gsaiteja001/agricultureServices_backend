@@ -5,6 +5,8 @@ const Address = require('../models/Address');
 const Equipment = require('../models/Equipment');
 const Service = require('../models/Service');
 
+const Farmer = require('../models/farmer');
+
 module.exports = {
   // Create a new ServiceProvider
   createServiceProvider: async (req, res) => {
@@ -20,6 +22,7 @@ module.exports = {
         Addresses, // Array of address objects
         Equipments, // Array of equipment objects
         ServiceIDs, // Array of service IDs
+        farmerId,
       } = req.body;
 
       // Create the ServiceProvider
@@ -54,33 +57,31 @@ module.exports = {
         await serviceProvider.addServices(ServiceIDs);
       }
 
+      // Update Farmer's ProviderId if farmerId is provided
+      if (farmerId) {
+        try {
+          const farmer = await Farmer.findOne({ farmerId: farmerId });
+          if (!farmer) {
+            // If farmer not found, optionally handle it
+            return res.status(404).json({ error: 'Farmer not found' });
+          }
+
+          // Update ProviderId
+          farmer.ProviderId = ProviderID;
+          await farmer.save();
+        } catch (error) {
+          console.error('Error updating Farmer ProviderId:', error);
+          // Optionally, you might want to rollback the ServiceProvider creation
+          return res.status(500).json({ error: 'Failed to update Farmer ProviderId' });
+        }
+      }
+
       res.status(201).json({
         message: 'ServiceProvider created successfully',
         data: serviceProvider,
       });
     } catch (error) {
       console.error('Error creating ServiceProvider:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  },
-
-  // Update existing ServiceProvider basic details
-  updateServiceProvider: async (req, res) => {
-    try {
-      const { ProviderID } = req.params;
-      const updateData = req.body;
-
-      const [updated] = await ServiceProvider.update(updateData, {
-        where: { ProviderID },
-      });
-
-      if (!updated) {
-        return res.status(404).json({ error: 'ServiceProvider not found' });
-      }
-
-      res.json({ message: 'ServiceProvider updated successfully' });
-    } catch (error) {
-      console.error('Error updating ServiceProvider:', error);
       res.status(500).json({ error: 'Internal Server Error' });
     }
   },
