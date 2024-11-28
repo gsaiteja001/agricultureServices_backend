@@ -135,6 +135,85 @@ module.exports = {
     }
   },
 
+   // Update a ServiceProvider along with Equipments and Services
+  updateServiceProvider: async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+      const { ProviderID } = req.params;
+      const {
+        Name,
+        ContactInfo,
+        Availability,
+        Experience,
+        Certifications,
+        Ratings,
+        Addresses, // Array of address objects
+        Equipments, // Array of equipment objects
+        ServiceIDs, // Array of service IDs
+        farmerId,
+      } = req.body;
+
+      // Find the existing ServiceProvider
+      const serviceProvider = await ServiceProvider.findByPk(ProviderID, { transaction });
+
+      if (!serviceProvider) {
+        await transaction.rollback();
+        return res.status(404).json({ error: 'ServiceProvider not found' });
+      }
+
+      // Update the ServiceProvider's basic details
+      await serviceProvider.update({
+        Name,
+        ContactInfo,
+        Availability,
+        Experience,
+        Certifications,
+        Ratings,
+        farmerId,
+      }, { transaction });
+
+      // Update Addresses
+      if (Addresses && Addresses.length > 0) {
+        // Delete existing Addresses
+        await Address.destroy({ where: { ProviderID }, transaction });
+        // Create new Addresses
+        const addressPromises = Addresses.map((address) =>
+          Address.create({ ...address, ProviderID }, { transaction })
+        );
+        await Promise.all(addressPromises);
+      }
+
+      // Update Equipments
+      if (Equipments && Equipments.length > 0) {
+        // Remove existing Equipments
+        await Equipment.destroy({ where: { OwnedBy: ProviderID }, transaction });
+        // Add new Equipments
+        const equipmentPromises = Equipments.map((equipment) =>
+          Equipment.create({ ...equipment, OwnedBy: ProviderID }, { transaction })
+        );
+        await Promise.all(equipmentPromises);
+      }
+
+      // Update Services
+      if (ServiceIDs && ServiceIDs.length > 0) {
+        // Set the new list of Services
+        await serviceProvider.setServices(ServiceIDs, { transaction });
+      } else {
+        // If no ServiceIDs provided, remove all associations
+        await serviceProvider.setServices([], { transaction });
+      }
+
+      // Commit the transaction
+      await transaction.commit();
+
+      res.json({ message: 'ServiceProvider updated successfully' });
+    } catch (error) {
+      console.error('Error updating ServiceProvider:', error);
+      await transaction.rollback();
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  },
+
    deleteServiceProvider: async (req, res) => {
     const { ProviderID } = req.params;
 
