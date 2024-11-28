@@ -32,6 +32,11 @@ const ServiceProvider = sequelize.define('ServiceProvider', {
     type: DataTypes.DECIMAL,
     allowNull: false,
   },
+  farmerId: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true, // Ensure one-to-one relationship
+  },
 }, {
   tableName: 'ServiceProvider',
   timestamps: false,
