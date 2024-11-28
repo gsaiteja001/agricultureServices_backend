@@ -88,7 +88,7 @@ module.exports = {
       }
 
       // Update Farmer's ProviderId in Mongoose
-      farmer.ProviderId = ProviderID;
+      farmer.ProviderID = ProviderID;
       await farmer.save();
 
       // Commit the transaction
