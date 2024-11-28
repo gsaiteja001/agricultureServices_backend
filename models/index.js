@@ -25,6 +25,7 @@
 
 // models/index.js
 
+
 const sequelize = require('../config/database');
 const { Sequelize } = require('sequelize');
 
@@ -34,6 +35,7 @@ const Service = require('./Service');
 const ServiceProvider_Service = require('./ServiceProvider_Service');
 const Address = require('./Address');
 const Equipment = require('./Equipment');
+const Farmer = require('./farmer'); 
 
 // Define Associations
 
@@ -43,7 +45,6 @@ ServiceProvider.belongsToMany(Service, {
   foreignKey: 'ProviderID',
   otherKey: 'ServiceID',
 });
-
 Service.belongsToMany(ServiceProvider, {
   through: ServiceProvider_Service,
   foreignKey: 'ServiceID',
@@ -58,6 +59,10 @@ Equipment.belongsTo(ServiceProvider, { foreignKey: 'OwnedBy' });
 ServiceProvider.hasMany(Address, { foreignKey: 'ProviderID' });
 Address.belongsTo(ServiceProvider, { foreignKey: 'ProviderID' });
 
+// ServiceProvider -> Farmer (One-to-Many or One-to-One, depending on your schema)
+ServiceProvider.hasMany(Farmer, { foreignKey: 'ProviderId' });
+Farmer.belongsTo(ServiceProvider, { foreignKey: 'ProviderId' });
+
 // Export Models
 module.exports = {
   ServiceProvider,
@@ -65,6 +70,7 @@ module.exports = {
   ServiceProvider_Service,
   Address,
   Equipment,
+  Farmer,
   sequelize,
   Sequelize,
 };
