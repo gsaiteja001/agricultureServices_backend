@@ -6,6 +6,8 @@ const Service = require('../models/Service');
 const sequelize = require('../config/database');
 const Farmer = require('../models/farmer');
 
+const { Op } = require('sequelize');
+
 module.exports = {
   // Create a new ServiceProvider
   createServiceProvider: async (req, res) => {
@@ -173,7 +175,7 @@ module.exports = {
       }, { transaction });
 
       // Update Addresses
-      if (Addresses && Addresses.length > 0) {
+      if (Addresses) {
         // Delete existing Addresses
         await Address.destroy({ where: { ProviderID }, transaction });
         // Create new Addresses
@@ -184,18 +186,53 @@ module.exports = {
       }
 
       // Update Equipments
-      if (Equipments && Equipments.length > 0) {
-        // Remove existing Equipments
-        await Equipment.destroy({ where: { OwnedBy: ProviderID }, transaction });
-        // Add new Equipments
-        const equipmentPromises = Equipments.map((equipment) =>
-          Equipment.create({ ...equipment, OwnedBy: ProviderID }, { transaction })
+      if (Equipments) {
+        // Get existing Equipment IDs for the Provider
+        const existingEquipments = await Equipment.findAll({
+          where: { OwnedBy: ProviderID },
+          transaction,
+        });
+
+        const existingEquipmentIDs = existingEquipments.map(eq => eq.EquipmentID);
+        const newEquipmentIDs = Equipments.map(eq => eq.EquipmentID);
+
+        // Equipments to delete
+        const equipmentsToDelete = existingEquipments.filter(
+          eq => !newEquipmentIDs.includes(eq.EquipmentID)
         );
-        await Promise.all(equipmentPromises);
+
+        // Delete equipments that are no longer associated
+        if (equipmentsToDelete.length > 0) {
+          const deleteIDs = equipmentsToDelete.map(eq => eq.EquipmentID);
+          await Equipment.destroy({
+            where: { EquipmentID: deleteIDs },
+            transaction,
+          });
+        }
+
+        // Update or create equipments
+        for (const equipment of Equipments) {
+          if (existingEquipmentIDs.includes(equipment.EquipmentID)) {
+            // Update existing equipment
+            await Equipment.update(
+              { ...equipment },
+              {
+                where: { EquipmentID: equipment.EquipmentID },
+                transaction,
+              }
+            );
+          } else {
+            // Create new equipment
+            await Equipment.create(
+              { ...equipment, OwnedBy: ProviderID },
+              { transaction }
+            );
+          }
+        }
       }
 
       // Update Services
-      if (ServiceIDs && ServiceIDs.length > 0) {
+      if (ServiceIDs) {
         // Set the new list of Services
         await serviceProvider.setServices(ServiceIDs, { transaction });
       } else {
@@ -214,6 +251,8 @@ module.exports = {
     }
   },
 
+
+  
    deleteServiceProvider: async (req, res) => {
     const { ProviderID } = req.params;
 
