@@ -9,6 +9,7 @@ const Farmer = require('../models/farmer');
 module.exports = {
   // Create a new ServiceProvider
   createServiceProvider: async (req, res) => {
+    const transaction = await sequelize.transaction();
     try {
       const {
         ProviderID,
@@ -24,6 +25,13 @@ module.exports = {
         farmerId,
       } = req.body;
 
+      // Check if farmerId exists in Mongoose
+      const farmer = await Farmer.findOne({ farmerId: farmerId });
+      if (!farmer) {
+        await transaction.rollback();
+        return res.status(404).json({ error: 'Farmer not found' });
+      }
+
       // Create the ServiceProvider
       const serviceProvider = await ServiceProvider.create({
         ProviderID,
@@ -33,12 +41,13 @@ module.exports = {
         Experience,
         Certifications,
         Ratings,
-      });
+        farmerId, // Include farmerId in ServiceProvider
+      }, { transaction });
 
       // Associate Addresses
       if (Addresses && Addresses.length > 0) {
         const addressPromises = Addresses.map((address) =>
-          Address.create({ ...address, ProviderID })
+          Address.create({ ...address, ProviderID }, { transaction })
         );
         await Promise.all(addressPromises);
       }
@@ -46,34 +55,22 @@ module.exports = {
       // Associate Equipments
       if (Equipments && Equipments.length > 0) {
         const equipmentPromises = Equipments.map((equipment) =>
-          Equipment.create({ ...equipment, OwnedBy: ProviderID })
+          Equipment.create({ ...equipment, OwnedBy: ProviderID }, { transaction })
         );
         await Promise.all(equipmentPromises);
       }
 
       // Associate Services
       if (ServiceIDs && ServiceIDs.length > 0) {
-        await serviceProvider.addServices(ServiceIDs);
+        await serviceProvider.addServices(ServiceIDs, { transaction });
       }
 
-      // Update Farmer's ProviderId if farmerId is provided
-      if (farmerId) {
-        try {
-          const farmer = await Farmer.findOne({ farmerId: farmerId });
-          if (!farmer) {
-            // If farmer not found, optionally handle it
-            return res.status(404).json({ error: 'Farmer not found' });
-          }
+      // Update Farmer's ProviderId in Mongoose
+      farmer.ProviderId = ProviderID;
+      await farmer.save();
 
-          // Update ProviderId
-          farmer.ProviderId = ProviderID;
-          await farmer.save();
-        } catch (error) {
-          console.error('Error updating Farmer ProviderId:', error);
-          // Optionally, you might want to rollback the ServiceProvider creation
-          return res.status(500).json({ error: 'Failed to update Farmer ProviderId' });
-        }
-      }
+      // Commit the transaction
+      await transaction.commit();
 
       res.status(201).json({
         message: 'ServiceProvider created successfully',
@@ -81,10 +78,10 @@ module.exports = {
       });
     } catch (error) {
       console.error('Error creating ServiceProvider:', error);
+      await transaction.rollback();
       res.status(500).json({ error: 'Internal Server Error' });
     }
   },
-
   // Update the Equipments held by a ServiceProvider
   updateServiceProviderEquipments: async (req, res) => {
     try {
