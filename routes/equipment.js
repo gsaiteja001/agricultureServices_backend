@@ -5,45 +5,26 @@ const router = express.Router();
 const { Equipment, Service, ServiceProvider, Crop, Address } = require('../models');
 
 /**
- * @route   GET /api/equipment
- * @desc    Fetch all Equipment with their associated Services, ServiceProviders, and Crops
+ * @route   GET /api/equipments
+ * @desc    Fetch all Equipments with their associated ServiceProvider
  * @access  Public or Protected (depending on your application)
  */
 router.get('/', async (req, res) => {
   try {
-    const equipmentList = await Equipment.findAll({
-      include: [
-        {
-          model: ServiceProvider,
-          through: { attributes: [] }, // Exclude join table attributes
-          attributes: ['ProviderID', 'Name', 'ContactInfo'], // Corrected attribute names
-          include: [
-            {
-              model: Service,
-              through: { attributes: [] },
-              attributes: ['ServiceID', 'ServiceName', 'Description'],
-            },
-            {
-              model: Address,
-              attributes: ['Street', 'City', 'State', 'ZipCode'], // Corrected casing
-            },
-          ],
-        },
-        {
-          model: Crop,
-          through: { attributes: [] },
-          attributes: ['CropID', 'Name'], 
-        },
-      ],
-      order: [['Name', 'ASC']], 
+    const equipments = await Equipment.findAll({
+      include: {
+        model: ServiceProvider,
+        attributes: ['ProviderID', 'Name', 'ContactInfo'], // Specify desired attributes
+      },
     });
-
-    res.json(equipmentList);
+    res.json(equipments);
   } catch (error) {
     console.error('Error fetching Equipment:', error);
     res.status(500).json({ error: 'An error occurred while fetching equipment.' });
   }
 });
+
+
 
 /**
  * @route   GET /api/equipment/:id
