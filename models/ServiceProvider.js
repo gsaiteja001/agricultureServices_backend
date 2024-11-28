@@ -2,6 +2,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Address = require('./Address');
+const Equipment = require('./Equipment');
+const Service = require('./Service');
 
 const ServiceProvider = sequelize.define('ServiceProvider', {
   ProviderID: {
@@ -15,13 +17,6 @@ const ServiceProvider = sequelize.define('ServiceProvider', {
   ContactInfo: {
     type: DataTypes.STRING,
     allowNull: false,
-  },
-  AddressID: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: Address,
-      key: 'AddressID',
-    },
   },
   Availability: {
     type: DataTypes.STRING,
@@ -45,6 +40,12 @@ const ServiceProvider = sequelize.define('ServiceProvider', {
 });
 
 // Associations
-ServiceProvider.belongsTo(Address, { foreignKey: 'AddressID' });
+ServiceProvider.hasMany(Address, { foreignKey: 'ProviderID' });
+ServiceProvider.hasMany(Equipment, { foreignKey: 'OwnedBy' });
+ServiceProvider.belongsToMany(Service, {
+  through: 'ServiceProvider_Service',
+  foreignKey: 'ProviderID',
+  otherKey: 'ServiceID',
+});
 
 module.exports = ServiceProvider;
