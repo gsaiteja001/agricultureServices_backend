@@ -77,10 +77,16 @@ router.get('/:id', async (req, res) => {
 // POST create a new ServiceProvider
 router.post('/create', serviceProviderController.createServiceProvider);
 
+
+
 // PUT update ServiceProvider's Equipments
 router.put('/:ProviderID/equipments', serviceProviderController.updateServiceProviderEquipments);
 
+
+
 // PUT add or remove Services for a ServiceProvider
 router.put('/:ProviderID/services', serviceProviderController.updateServiceProviderServices);
+
+
 
 module.exports = router;
