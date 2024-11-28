@@ -1,4 +1,3 @@
-// controllers/serviceProviderController.js
 
 const ServiceProvider = require('../models/ServiceProvider');
 const Address = require('../models/Address');
@@ -138,4 +137,59 @@ module.exports = {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   },
+
+   deleteServiceProvider: async (req, res) => {
+    const { ProviderID } = req.params;
+
+    // Start a transaction to ensure data integrity
+    const transaction = await sequelize.transaction();
+
+    try {
+      // Find the ServiceProvider
+      const serviceProvider = await ServiceProvider.findOne({
+        where: { ProviderID },
+        transaction,
+      });
+
+      if (!serviceProvider) {
+        await transaction.rollback();
+        return res.status(404).json({ error: 'ServiceProvider not found' });
+      }
+
+      // Delete associated Addresses
+      await Address.destroy({
+        where: { ProviderID },
+        transaction,
+      });
+
+      // Delete associated Equipments
+      await Equipment.destroy({
+        where: { OwnedBy: ProviderID },
+        transaction,
+      });
+
+      // Remove associations with Services (Many-to-Many)
+      await serviceProvider.setServices([], { transaction });
+
+      // Update associated Farmers
+      await Farmer.update(
+        { ProviderId: null },
+        { where: { ProviderId: ProviderID }, transaction }
+      );
+
+      // Finally, delete the ServiceProvider
+      await serviceProvider.destroy({ transaction });
+
+      // Commit the transaction
+      await transaction.commit();
+
+      res.json({ message: 'ServiceProvider deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting ServiceProvider:', error);
+      await transaction.rollback();
+      res.status(500).json({ error: 'An error occurred while deleting the ServiceProvider.' });
+    }
+  },
+
+  
 };
