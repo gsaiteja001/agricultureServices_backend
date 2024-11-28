@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const { ServiceProvider, Service, Equipment, Address } = require('../models');
 const serviceProviderController = require('../controllers/serviceProviderController');
+
 /**
  * @route   GET /api/serviceProviders
  * @desc    Fetch all ServiceProviders with their associated Services, Equipment, and Address
@@ -15,20 +16,19 @@ router.get('/', async (req, res) => {
       include: [
         {
           model: Service,
-          through: { attributes: [] }, // Exclude join table attributes
-          attributes: ['ServiceID', 'ServiceName', 'Description'], // Specify desired attributes
+          through: { attributes: [] }, 
+          attributes: ['ServiceID', 'ServiceName', 'Description'],
         },
         {
           model: Equipment,
-          through: { attributes: [] }, // Exclude join table attributes
-          attributes: ['EquipmentID', 'Name', 'Type', 'Description'], // Adjusted attribute names
+          attributes: ['EquipmentID', 'Name', 'Type', 'Description'], 
         },
         {
           model: Address,
-          attributes: ['Street', 'City', 'State', 'ZipCode'], // Ensure correct casing
+          attributes: ['Street', 'City', 'State', 'ZipCode'],
         },
       ],
-      order: [['Name', 'ASC']], // Adjusted to match model's 'Name' attribute
+      order: [['Name', 'ASC']],
     });
 
     res.json(serviceProviders);
@@ -54,12 +54,11 @@ router.get('/:id', async (req, res) => {
         },
         {
           model: Equipment,
-          through: { attributes: [] },
           attributes: ['EquipmentID', 'Name', 'Type', 'Description'],
         },
         {
           model: Address,
-          attributes: ['Street', 'City', 'State', 'ZipCode'],
+          attributes: ['Street', 'City', 'State', 'ZipCode'], 
         },
       ],
     });
@@ -83,6 +82,5 @@ router.put('/:ProviderID/equipments', serviceProviderController.updateServicePro
 
 // PUT add or remove Services for a ServiceProvider
 router.put('/:ProviderID/services', serviceProviderController.updateServiceProviderServices);
-
 
 module.exports = router;
