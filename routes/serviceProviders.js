@@ -23,10 +23,10 @@ router.get('/', async (req, res) => {
           model: Equipment,
           attributes: ['EquipmentID', 'Name', 'Type', 'Description'], 
         },
-        // {
-        //   model: Address,
-        //   attributes: ['Street', 'City', 'State', 'ZipCode'],
-        // },
+        {
+          model: Address,
+          attributes: ['Street', 'City', 'State', 'ZipCode'],
+        },
       ],
       order: [['Name', 'ASC']],
     });
@@ -54,7 +54,7 @@ router.get('/:id', async (req, res) => {
         },
         {
           model: Equipment,
-          attributes: ['EquipmentID', 'Name', 'Type', 'Description'],
+          attributes: ['EquipmentID', 'Name', 'Type', 'Description', 'Capacity'],
         },
         {
           model: Address,
