@@ -22,9 +22,10 @@ exports.addServiceRequest = async (req, res) => {
 
   // Start a transaction for Sequelize
   const t = await sequelize.transaction();
-
+  console.log('receivedserviceProvider',serviceProviderID);
   try {
-    const ProviderID = serviceProviderID;
+    const ProviderID = ProviderID;
+    console.log('serviceProvider',serviceProviderID);
     // Validate ServiceProvider
     const serviceProvider = await ServiceProvider.findByPk(ProviderID, { transaction: t });
     if (!serviceProvider) {
