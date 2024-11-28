@@ -34,32 +34,52 @@ module.exports = {
         return res.status(404).json({ error: 'Farmer not found' });
       }
 
-      // Create the ServiceProvider
-      const serviceProvider = await ServiceProvider.create({
-        ProviderID,
-        Name,
-        ContactInfo,
-        Availability,
-        Experience,
-        Certifications,
-        Ratings,
-        farmerId, // Include farmerId in ServiceProvider
-      }, { transaction });
+       const serviceProvider = await ServiceProvider.create(
+        {
+          ProviderID,
+          Name,
+          ContactInfo,
+          Availability,
+          Experience,
+          Certifications,
+          Ratings,
+          farmerId,
+        },
+        { transaction }
+      );
 
+      const equipmentIDs = Equipments.map((eq) => eq.EquipmentID).filter(Boolean);
+      const uniqueEquipmentIDs = new Set(equipmentIDs);
+      
+      if (equipmentIDs.length !== uniqueEquipmentIDs.size) {
+        throw new Error('Duplicate EquipmentID detected in Equipments array.');
+      }
+
+      // Associate Equipments
+      if (Equipments && Equipments.length > 0) {
+        const equipmentPromises = Equipments.map((equipment) =>
+          Equipment.create(
+            {
+              EquipmentID: equipment.EquipmentID || undefined, // Let Sequelize generate
+              Name: equipment.Name,
+              Type: equipment.Type,
+              Description: equipment.Description,
+              Capacity: equipment.Capacity,
+              OwnedBy: ProviderID,
+            },
+            { transaction }
+          )
+        );
+        await Promise.all(equipmentPromises);
+      }
+
+      
       // Associate Addresses
       if (Addresses && Addresses.length > 0) {
         const addressPromises = Addresses.map((address) =>
           Address.create({ ...address, ProviderID }, { transaction })
         );
         await Promise.all(addressPromises);
-      }
-
-      // Associate Equipments
-      if (Equipments && Equipments.length > 0) {
-        const equipmentPromises = Equipments.map((equipment) =>
-          Equipment.create({ ...equipment, OwnedBy: ProviderID }, { transaction })
-        );
-        await Promise.all(equipmentPromises);
       }
 
       // Associate Services
