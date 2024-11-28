@@ -218,11 +218,11 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
     let statusFilter = {};
     if (status === 'active') {
       statusFilter = {
-        Status: ['pending', 'accepted'],
+        Status: ['Pending', 'InProgress', 'Assigned'],
       };
     } else if (status === 'completed') {
       statusFilter = {
-        Status: ['completed', 'canceled'],
+        Status: ['Completed', 'Canceled'],
       };
     }
 
