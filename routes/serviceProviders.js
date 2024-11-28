@@ -3,7 +3,7 @@
 const express = require('express');
 const router = express.Router();
 const { ServiceProvider, Service, Equipment, Address } = require('../models');
-
+const serviceProviderController = require('../controllers/serviceProviderController');
 /**
  * @route   GET /api/serviceProviders
  * @desc    Fetch all ServiceProviders with their associated Services, Equipment, and Address
@@ -74,5 +74,15 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// POST create a new ServiceProvider
+router.post('/create', serviceProviderController.createServiceProvider);
+
+// PUT update ServiceProvider's Equipments
+router.put('/:ProviderID/equipments', serviceProviderController.updateServiceProviderEquipments);
+
+// PUT add or remove Services for a ServiceProvider
+router.put('/:ProviderID/services', serviceProviderController.updateServiceProviderServices);
+
 
 module.exports = router;
