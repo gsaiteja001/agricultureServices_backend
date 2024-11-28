@@ -50,11 +50,21 @@ exports.addServiceRequest = async (req, res) => {
 
         ServiceProviderID: serviceProviderId,
         ServiceID: serviceId,
-        Status: 'pending',
+        Status: 'Pending', // Ensure consistent casing
         Notes: notes,
       },
       { transaction: t }
     );
+
+    // Prepare the service request object to push into MongoDB
+    const serviceRequestForMongo = {
+      requestID: newServiceRequest.RequestID,
+      serviceID: newServiceRequest.ServiceID,
+      serviceProviderID: newServiceRequest.ServiceProviderID,
+      status: newServiceRequest.Status,
+      scheduledDate: newServiceRequest.ScheduledDate,
+      // Add other relevant fields if necessary
+    };
 
     // Update Farmer document in MongoDB
     const farmer = await Farmer.findOne({ farmerId: farmerId });
@@ -62,8 +72,8 @@ exports.addServiceRequest = async (req, res) => {
       throw new Error('Farmer not found in MongoDB.');
     }
 
-    // Add to currentOrders
-    farmer.currentServiceRequests.push(newServiceRequest.RequestID);
+    // Add to currentServiceRequests
+    farmer.currentServiceRequests.push(serviceRequestForMongo);
     await farmer.save();
 
     // Commit the transaction
@@ -106,17 +116,33 @@ exports.updateServiceRequest = async (req, res) => {
         throw new Error('Farmer not found in MongoDB.');
       }
 
-      if (updateData.Status === 'completed' || updateData.Status === 'canceled') {
-        // Remove from currentOrders
-        farmer.currentOrders = farmer.currentOrders.filter(id => id !== requestId);
-        // Add to completedOrders or returnedOrders based on status
-        if (updateData.Status === 'completed') {
-          farmer.completedOrders.push(requestId);
-        } else if (updateData.Status === 'canceled') {
-          farmer.returnedOrders.push(requestId);
-        }
-        await farmer.save();
+      // Find the service request in currentServiceRequests
+      const serviceRequestIndex = farmer.currentServiceRequests.findIndex(
+        (req) => req.requestID === requestId
+      );
+
+      if (serviceRequestIndex === -1) {
+        throw new Error('Service Request not found in farmer\'s currentServiceRequests.');
       }
+
+      // Remove from currentServiceRequests
+      const [completedServiceRequest] = farmer.currentServiceRequests.splice(serviceRequestIndex, 1);
+
+      // Update the status
+      completedServiceRequest.status = updateData.Status;
+      completedServiceRequest.scheduledDate = serviceRequest.ScheduledDate;
+      // Update other fields if necessary
+
+      // Add to completedServiceRequests or returnedServiceRequests based on status
+      if (updateData.Status === 'Completed') {
+        farmer.completedServiceRequests.push(completedServiceRequest);
+      } else if (updateData.Status === 'Cancelled') {
+        // Assuming you have a 'returnedServiceRequests' array
+        farmer.returnedServiceRequests = farmer.returnedServiceRequests || [];
+        farmer.returnedServiceRequests.push(completedServiceRequest);
+      }
+
+      await farmer.save();
     }
 
     // Commit the transaction
@@ -133,6 +159,7 @@ exports.updateServiceRequest = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
 
 // Get active/completed Service Requests for a ServiceProvider
 exports.getServiceRequestsForProvider = async (req, res) => {
