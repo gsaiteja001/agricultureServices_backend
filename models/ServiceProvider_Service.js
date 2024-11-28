@@ -3,6 +3,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+const ServiceProvider = require('./ServiceProvider');
+const Service = require('./Service'); 
+
 const ServiceProvider_Service = sequelize.define('ServiceProvider_Service', {
   ProviderID: {
     type: DataTypes.STRING,
