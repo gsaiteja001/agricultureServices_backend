@@ -187,35 +187,47 @@ module.exports = {
 
       // Update Equipments
       if (Equipments) {
-        // Get existing Equipment IDs for the Provider
+        // Fetch existing equipments for the Provider
         const existingEquipments = await Equipment.findAll({
           where: { OwnedBy: ProviderID },
           transaction,
         });
 
-        const existingEquipmentIDs = existingEquipments.map(eq => eq.EquipmentID);
-        const newEquipmentIDs = Equipments.map(eq => eq.EquipmentID);
+        const existingEquipmentMap = {};
+        existingEquipments.forEach((eq) => {
+          existingEquipmentMap[eq.EquipmentID] = eq;
+        });
 
-        // Equipments to delete
+        // IDs of equipments sent in the request
+        const incomingEquipmentIDs = Equipments
+          .filter((eq) => eq.EquipmentID)
+          .map((eq) => eq.EquipmentID);
+
+        // Delete equipments that are not in the incoming request
         const equipmentsToDelete = existingEquipments.filter(
-          eq => !newEquipmentIDs.includes(eq.EquipmentID)
+          (eq) => !incomingEquipmentIDs.includes(eq.EquipmentID)
         );
 
-        // Delete equipments that are no longer associated
         if (equipmentsToDelete.length > 0) {
-          const deleteIDs = equipmentsToDelete.map(eq => eq.EquipmentID);
+          const deleteIDs = equipmentsToDelete.map((eq) => eq.EquipmentID);
           await Equipment.destroy({
             where: { EquipmentID: deleteIDs },
             transaction,
           });
         }
 
-        // Update or create equipments
+        // Update existing and create new equipments
         for (const equipment of Equipments) {
-          if (existingEquipmentIDs.includes(equipment.EquipmentID)) {
+          if (equipment.EquipmentID && existingEquipmentMap[equipment.EquipmentID]) {
             // Update existing equipment
             await Equipment.update(
-              { ...equipment },
+              {
+                Name: equipment.Name,
+                Type: equipment.Type,
+                Description: equipment.Description,
+                Capacity: equipment.Capacity,
+                OwnedBy: ProviderID,
+              },
               {
                 where: { EquipmentID: equipment.EquipmentID },
                 transaction,
@@ -224,13 +236,20 @@ module.exports = {
           } else {
             // Create new equipment
             await Equipment.create(
-              { ...equipment, OwnedBy: ProviderID },
+              {
+                EquipmentID: equipment.EquipmentID || undefined, // Let Sequelize generate if undefined
+                Name: equipment.Name,
+                Type: equipment.Type,
+                Description: equipment.Description,
+                Capacity: equipment.Capacity,
+                OwnedBy: ProviderID,
+              },
               { transaction }
             );
           }
         }
       }
-
+      
       // Update Services
       if (ServiceIDs) {
         // Set the new list of Services
