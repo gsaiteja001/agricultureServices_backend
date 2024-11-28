@@ -61,7 +61,7 @@ exports.addServiceRequest = async (req, res) => {
     const serviceRequestForMongo = {
       requestID: newServiceRequest.RequestID,
       serviceID: newServiceRequest.ServiceID,
-      ProviderID: newServiceRequest.ServiceProviderID,
+      ServiceProviderID: newServiceRequest.ServiceProviderID,
       status: newServiceRequest.Status,
       scheduledDate: newServiceRequest.ScheduledDate,
       // Add other relevant fields if necessary
