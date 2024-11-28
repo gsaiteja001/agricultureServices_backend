@@ -21,21 +21,26 @@ const ServiceProvider_Service = sequelize.define('ServiceProvider_Service', {
       key: 'ServiceID',
     },
   },
-  // Additional fields can be added here if needed
 }, {
   tableName: 'ServiceProvider_Service',
-  timestamps: false,
+  timestamps: false, // Disable timestamps
 });
 
-// Associations
+// Ensure associations are defined in both models
 ServiceProvider.belongsToMany(Service, {
-  through: ServiceProvider_Service,
+  through: {
+    model: ServiceProvider_Service,
+    timestamps: false,
+  },
   foreignKey: 'ProviderID',
   otherKey: 'ServiceID',
 });
 
 Service.belongsToMany(ServiceProvider, {
-  through: ServiceProvider_Service,
+  through: {
+    model: ServiceProvider_Service,
+    timestamps: false,
+  },
   foreignKey: 'ServiceID',
   otherKey: 'ProviderID',
 });
