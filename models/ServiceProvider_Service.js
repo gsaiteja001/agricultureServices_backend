@@ -36,6 +36,7 @@ const ServiceProvider_Service = sequelize.define('ServiceProvider_Service', {
 //   otherKey: 'ServiceID',
 // });
 
+
 // Service.belongsToMany(ServiceProvider, {
 //   through: {
 //     model: ServiceProvider_Service,
