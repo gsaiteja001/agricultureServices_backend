@@ -15,7 +15,6 @@ exports.addServiceRequest = async (req, res) => {
     farmerContactInfo,
     farmerAddress,
     scheduledDate,
-
     serviceProviderId,
     serviceId,
     notes,
