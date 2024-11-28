@@ -1,11 +1,7 @@
 // models/ServiceProvider.js
+
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Address = require('./Address');
-const Equipment = require('./Equipment');
-const Service = require('./Service');
-
-const ServiceProvider_Service = require('./ServiceProvider_Service');
 
 const ServiceProvider = sequelize.define('ServiceProvider', {
   ProviderID: {
@@ -41,17 +37,4 @@ const ServiceProvider = sequelize.define('ServiceProvider', {
   timestamps: false,
 });
 
-// Associations
-ServiceProvider.hasMany(Address, { foreignKey: 'ProviderID' });
-ServiceProvider.hasMany(Equipment, { foreignKey: 'OwnedBy' });
-
-// Modify belongsToMany to include timestamps: false
-ServiceProvider.belongsToMany(Service, {
-  through: {
-    model: ServiceProvider_Service,
-    timestamps: false,
-  },
-  foreignKey: 'ProviderID',
-  otherKey: 'ServiceID',
-});
 module.exports = ServiceProvider;
