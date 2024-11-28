@@ -19,53 +19,53 @@ const Equipment_Crop = require('./models/Equipment_Crop');
 const Crop = require('./models/Crop');
 const Address = require('./models/Address');
 
-// Define associations
-// ServiceProvider and Address
-ServiceProvider.belongsTo(Address, { foreignKey: 'AddressID' });
-Address.hasOne(ServiceProvider, { foreignKey: 'AddressID' });
+// // Define associations
+// // ServiceProvider and Address
+// ServiceProvider.belongsTo(Address, { foreignKey: 'AddressID' });
+// Address.hasOne(ServiceProvider, { foreignKey: 'AddressID' });
 
-// ServiceProvider and Service (many-to-many)
-ServiceProvider.belongsToMany(Service, {
-  through: ServiceProvider_Service,
-  foreignKey: 'ProviderID',
-  otherKey: 'ServiceID',
-});
-Service.belongsToMany(ServiceProvider, {
-  through: ServiceProvider_Service,
-  foreignKey: 'ServiceID',
-  otherKey: 'ProviderID',
-});
+// // ServiceProvider and Service (many-to-many)
+// ServiceProvider.belongsToMany(Service, {
+//   through: ServiceProvider_Service,
+//   foreignKey: 'ProviderID',
+//   otherKey: 'ServiceID',
+// });
+// Service.belongsToMany(ServiceProvider, {
+//   through: ServiceProvider_Service,
+//   foreignKey: 'ServiceID',
+//   otherKey: 'ProviderID',
+// });
 
-// ServiceProvider and Equipment (many-to-many)
-ServiceProvider.belongsToMany(Equipment, {
-  through: ServiceProvider_Equipment,
-  foreignKey: 'ProviderID',
-  otherKey: 'EquipmentID',
-});
-Equipment.belongsToMany(ServiceProvider, {
-  through: ServiceProvider_Equipment,
-  foreignKey: 'EquipmentID',
-  otherKey: 'ProviderID',
-});
+// // ServiceProvider and Equipment (many-to-many)
+// ServiceProvider.belongsToMany(Equipment, {
+//   through: ServiceProvider_Equipment,
+//   foreignKey: 'ProviderID',
+//   otherKey: 'EquipmentID',
+// });
+// Equipment.belongsToMany(ServiceProvider, {
+//   through: ServiceProvider_Equipment,
+//   foreignKey: 'EquipmentID',
+//   otherKey: 'ProviderID',
+// });
 
-// Equipment and Crop (many-to-many)
-Equipment.belongsToMany(Crop, {
-  through: Equipment_Crop,
-  foreignKey: 'EquipmentID',
-  otherKey: 'CropID',
-});
-Crop.belongsToMany(Equipment, {
-  through: Equipment_Crop,
-  foreignKey: 'CropID',
-  otherKey: 'EquipmentID',
-});
+// // Equipment and Crop (many-to-many)
+// Equipment.belongsToMany(Crop, {
+//   through: Equipment_Crop,
+//   foreignKey: 'EquipmentID',
+//   otherKey: 'CropID',
+// });
+// Crop.belongsToMany(Equipment, {
+//   through: Equipment_Crop,
+//   foreignKey: 'CropID',
+//   otherKey: 'EquipmentID',
+// });
 
-// ServiceOffering relationships
-ServiceOffering.belongsTo(ServiceProvider, { foreignKey: 'ProviderID' });
-ServiceProvider.hasMany(ServiceOffering, { foreignKey: 'ProviderID' });
+// // ServiceOffering relationships
+// ServiceOffering.belongsTo(ServiceProvider, { foreignKey: 'ProviderID' });
+// ServiceProvider.hasMany(ServiceOffering, { foreignKey: 'ProviderID' });
 
-ServiceOffering.belongsTo(Service, { foreignKey: 'ServiceID' });
-Service.hasMany(ServiceOffering, { foreignKey: 'ServiceID' });
+// ServiceOffering.belongsTo(Service, { foreignKey: 'ServiceID' });
+// Service.hasMany(ServiceOffering, { foreignKey: 'ServiceID' });
 
 // Initialize express app
 const app = express();
