@@ -26,23 +26,23 @@ const ServiceProvider_Service = sequelize.define('ServiceProvider_Service', {
   timestamps: false, // Disable timestamps
 });
 
-// Ensure associations are defined in both models
-ServiceProvider.belongsToMany(Service, {
-  through: {
-    model: ServiceProvider_Service,
-    timestamps: false,
-  },
-  foreignKey: 'ProviderID',
-  otherKey: 'ServiceID',
-});
+// // Ensure associations are defined in both models
+// ServiceProvider.belongsToMany(Service, {
+//   through: {
+//     model: ServiceProvider_Service,
+//     timestamps: false,
+//   },
+//   foreignKey: 'ProviderID',
+//   otherKey: 'ServiceID',
+// });
 
-Service.belongsToMany(ServiceProvider, {
-  through: {
-    model: ServiceProvider_Service,
-    timestamps: false,
-  },
-  foreignKey: 'ServiceID',
-  otherKey: 'ProviderID',
-});
+// Service.belongsToMany(ServiceProvider, {
+//   through: {
+//     model: ServiceProvider_Service,
+//     timestamps: false,
+//   },
+//   foreignKey: 'ServiceID',
+//   otherKey: 'ProviderID',
+// });
 
 module.exports = ServiceProvider_Service;
