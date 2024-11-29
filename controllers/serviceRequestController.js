@@ -7,6 +7,32 @@ const Service = require('../models/Service');
 const Address = require('../models/Address');
 const Farmer = require('../models/farmer');
 
+
+
+// Get All Service Requests
+exports.getAllServiceRequests = async (req, res) => {
+  try {
+    const serviceRequests = await ServiceRequest.findAll({
+      include: [
+        {
+          model: ServiceProvider,
+          attributes: ['ProviderID', 'Name', 'ContactInfo'], // Adjust attributes as needed
+        },
+        {
+          model: Service,
+          attributes: ['ServiceID', 'ServiceName', 'Category'], // Adjust attributes as needed
+        },
+      ],
+      order: [['ScheduledDate', 'DESC']], // Optional: Sort by ScheduledDate descending
+    });
+
+    res.status(200).json({ serviceRequests });
+  } catch (error) {
+    console.error('Error fetching all Service Requests:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 // Add a new Service Request
 exports.addServiceRequest = async (req, res) => {
   const {
