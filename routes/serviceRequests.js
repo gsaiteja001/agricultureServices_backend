@@ -19,4 +19,8 @@ router.get('/provider', serviceRequestController.getServiceRequestsForProvider);
 // GET /api/service-requests/farmer?farmerId=farmer123&status=active
 router.get('/farmer', serviceRequestController.getServiceRequestsForFarmer);
 
+// Route: Get All Service Requests
+// GET /api/service-requests/all
+router.get('/all', serviceRequestController.getAllServiceRequests);
+
 module.exports = router;
