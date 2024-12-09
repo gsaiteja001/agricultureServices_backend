@@ -1,41 +1,36 @@
 // models/Address.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const ServiceProvider = require('./ServiceProvider');
-
-const Address = sequelize.define('Address', {
-  AddressID: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const AddressSchema = new Schema({
+  provider: {
+    type: Schema.Types.ObjectId,
+    ref: 'ServiceProvider',
+    required: true,
   },
-  ProviderID: {
-    type: DataTypes.STRING,
-    references: {
-      model: 'ServiceProvider',
-      key: 'ProviderID',
+  street: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  zipCode: {
+    type: String,
+    default: null,
+  },
+    coordinates: {
+        type: String,
+      default: null,
     },
-  },
-  Street: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  City: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  State: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  ZipCode: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
 }, {
-  tableName: 'Address',
+  collection: 'Address',
   timestamps: false,
 });
 
-module.exports = Address;
+module.exports = mongoose.model('Address', AddressSchema);
