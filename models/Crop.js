@@ -1,27 +1,28 @@
 // models/Crop.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const Crop = sequelize.define('Crop', {
-  CropID: {
-    type: DataTypes.STRING,
-    primaryKey: true,
+const CropSchema = new Schema({
+  cropID: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  Name: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  name: {
+    type: String,
+    required: true,
   },
   scientificName: {
-    type: DataTypes.STRING,
-    allowNull: true,
+    type: String,
+    default: null,
   },
-  Description: {
-    type: DataTypes.TEXT,
-    allowNull: true,
+  description: {
+    type: String,
+    default: null,
   },
 }, {
-  tableName: 'Crop',
+  collection: 'Crop',
   timestamps: false,
 });
 
-module.exports = Crop;
+module.exports = mongoose.model('Crop', CropSchema);
