@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { Equipment, Service, ServiceProvider, Crop, Address } = require('../models');
+const { Equipment, ServiceProvider, Crop, Address } = require('../models'); // Assuming models are in Mongoose format
 
 /**
  * @route   GET /api/equipments
@@ -11,11 +11,9 @@ const { Equipment, Service, ServiceProvider, Crop, Address } = require('../model
  */
 router.get('/', async (req, res) => {
   try {
-    const equipments = await Equipment.findAll({
-      include: {
-        model: ServiceProvider,
-        attributes: ['ProviderID', 'Name', 'ContactInfo'], // Specify desired attributes
-      },
+    const equipments = await Equipment.find().populate({
+      path: 'serviceProvider',
+      select: 'ProviderID Name ContactInfo',
     });
     res.json(equipments);
   } catch (error) {
@@ -24,8 +22,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-
 /**
  * @route   GET /api/equipment/:id
  * @desc    Fetch a specific Equipment by ID with associated Services, ServiceProviders, and Crops
@@ -33,31 +29,26 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const equipment = await Equipment.findByPk(req.params.id, {
-      include: [
-        {
-          model: ServiceProvider,
-          through: { attributes: [] },
-          attributes: ['ProviderID', 'Name', 'ContactInfo'], 
-          include: [
-            {
-              model: Service,
-              through: { attributes: [] },
-              attributes: ['ServiceID', 'ServiceName', 'Description'],
-            },
-            {
-              model: Address,
-              attributes: ['Street', 'City', 'State', 'ZipCode'], 
-            },
-          ],
-        },
-        {
-          model: Crop,
-          through: { attributes: [] },
-          attributes: ['CropID', 'Name'], // Corrected attribute names
-        },
-      ],
-    });
+    const equipment = await Equipment.findById(req.params.id).populate([
+      {
+        path: 'serviceProvider',
+        select: 'ProviderID Name ContactInfo',
+        populate: [
+          {
+            path: 'services',
+            select: 'ServiceID ServiceName Description',
+          },
+          {
+            path: 'address',
+            select: 'Street City State ZipCode',
+          },
+        ],
+      },
+      {
+        path: 'crops',
+        select: 'CropID Name',
+      },
+    ]);
 
     if (equipment) {
       res.json(equipment);
