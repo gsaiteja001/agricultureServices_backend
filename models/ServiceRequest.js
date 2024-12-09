@@ -1,65 +1,55 @@
 // models/ServiceRequest.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const ServiceProvider = require('./ServiceProvider');
-const Service = require('./Service');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const ServiceRequest = sequelize.define('ServiceRequest', {
-  RequestID: {
-    type: DataTypes.STRING,
-    primaryKey: true,
+const ServiceRequestSchema = new Schema({
+  requestID: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  FarmerID: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  farmerID: {
+    type: String,
+    required: true,
   },
-  FarmerName: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  farmerName: {
+    type: String,
+    required: true,
   },
-  FarmerContactInfo: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  farmerContactInfo: {
+    type: String,
+    required: true,
   },
-  FarmerAddress: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  farmerAddress: {
+    type: String,
+    required: true,
   },
-  ScheduledDate: {
-    type: DataTypes.DATE,
-    allowNull: false,
+  scheduledDate: {
+    type: Date,
+    required: true,
   },
-
-  ServiceProviderID: {
-    type: DataTypes.STRING,
-    references: {
-      model: ServiceProvider,
-      key: 'ProviderID',
-    },
+  serviceProvider: {
+    type: Schema.Types.ObjectId,
+    ref: 'ServiceProvider',
+    required: true,
   },
-  ServiceID: {
-    type: DataTypes.STRING,
-    references: {
-      model: Service,
-      key: 'ServiceID',
-    },
+  service: {
+    type: Schema.Types.ObjectId,
+    ref: 'Service',
+    required: true,
   },
-  Status: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: 'pending',
+  status: {
+    type: String,
+    required: true,
+    default: 'pending',
   },
-  Notes: {
-    type: DataTypes.TEXT,
-    allowNull: true,
+  notes: {
+    type: String,
+    default: null,
   },
 }, {
-  tableName: 'ServiceRequest',
+  collection: 'ServiceRequest',
   timestamps: true,
 });
 
-// Associations
-ServiceRequest.belongsTo(ServiceProvider, { foreignKey: 'ServiceProviderID' });
-ServiceRequest.belongsTo(Service, { foreignKey: 'ServiceID' });
-
-module.exports = ServiceRequest;
+module.exports = mongoose.model('ServiceRequest', ServiceRequestSchema);
