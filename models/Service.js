@@ -1,28 +1,28 @@
 // models/Service.js
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
-const Service = sequelize.define('Service', {
-  ServiceID: {
-    type: DataTypes.STRING,
-    primaryKey: true,
+const ServiceSchema = new Schema({
+  serviceID: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  ServiceName: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  serviceName: {
+    type: String,
+    required: true,
   },
-  Category: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  category: {
+    type: String,
+    required: true,
   },
-  Description: {
-    type: DataTypes.TEXT,
-    allowNull: true,
+  description: {
+    type: String,
+    default: null,
   },
 }, {
-  tableName: 'Service',
+  collection: 'Service',
   timestamps: false,
 });
 
-module.exports = Service;
+module.exports = mongoose.model('Service', ServiceSchema);
