@@ -1,12 +1,12 @@
 // routes/serviceRoutes.js
 const express = require('express');
 const router = express.Router();
-const Service = require('../models/Service');
+const Service = require('../models/Service'); // Assuming Service is a Mongoose model
 
 // Get all services
 router.get('/services', async (req, res) => {
   try {
-    const services = await Service.findAll();
+    const services = await Service.find();
     res.json(services);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -16,7 +16,7 @@ router.get('/services', async (req, res) => {
 // Get a single service by ID
 router.get('/services/:id', async (req, res) => {
   try {
-    const service = await Service.findByPk(req.params.id);
+    const service = await Service.findById(req.params.id);
     if (service) {
       res.json(service);
     } else {
@@ -40,12 +40,9 @@ router.post('/services', async (req, res) => {
 // Update a service
 router.put('/services/:id', async (req, res) => {
   try {
-    const [updated] = await Service.update(req.body, {
-      where: { ServiceID: req.params.id },
-    });
+    const updated = await Service.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (updated) {
-      const updatedService = await Service.findByPk(req.params.id);
-      res.json(updatedService);
+      res.json(updated);
     } else {
       res.status(404).json({ error: 'Service not found' });
     }
@@ -57,9 +54,7 @@ router.put('/services/:id', async (req, res) => {
 // Delete a service
 router.delete('/services/:id', async (req, res) => {
   try {
-    const deleted = await Service.destroy({
-      where: { ServiceID: req.params.id },
-    });
+    const deleted = await Service.findByIdAndDelete(req.params.id);
     if (deleted) {
       res.json({ message: 'Service deleted' });
     } else {
