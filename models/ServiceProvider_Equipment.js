@@ -1,42 +1,24 @@
-// models/ServiceProvider_Equipment.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const ServiceProvider = require('./ServiceProvider');
-const Equipment = require('./Equipment');
+// models/ServiceProviderEquipment.js
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const ServiceProvider_Equipment = sequelize.define('ServiceProvider_Equipment', {
-  ProviderID: {
-    type: DataTypes.STRING,
-    primaryKey: true,
-    references: {
-      model: ServiceProvider,
-      key: 'ProviderID',
-    },
+const ServiceProviderEquipmentSchema = new Schema({
+  serviceProvider: {
+    type: Schema.Types.ObjectId,
+    ref: 'ServiceProvider',
+    required: true,
   },
-  EquipmentID: {
-    type: DataTypes.STRING,
-    primaryKey: true,
-    references: {
-      model: Equipment,
-      key: 'EquipmentID',
-    },
+  equipment: {
+    type: Schema.Types.ObjectId,
+    ref: 'Equipment',
+    required: true,
   },
 }, {
-  tableName: 'ServiceProvider_Equipment',
+  collection: 'ServiceProviderEquipment',
   timestamps: false,
 });
 
-// Associations
-ServiceProvider.belongsToMany(Equipment, {
-  through: ServiceProvider_Equipment,
-  foreignKey: 'ProviderID',
-  otherKey: 'EquipmentID',
-});
+// To ensure unique pairs, you can add a compound index
+ServiceProviderEquipmentSchema.index({ serviceProvider: 1, equipment: 1 }, { unique: true });
 
-Equipment.belongsToMany(ServiceProvider, {
-  through: ServiceProvider_Equipment,
-  foreignKey: 'EquipmentID',
-  otherKey: 'ProviderID',
-});
-
-module.exports = ServiceProvider_Equipment;
+module.exports = mongoose.model('ServiceProviderEquipment', ServiceProviderEquipmentSchema);
