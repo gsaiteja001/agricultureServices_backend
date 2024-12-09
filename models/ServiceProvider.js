@@ -1,45 +1,54 @@
 // models/ServiceProvider.js
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
 
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-
-const ServiceProvider = sequelize.define('ServiceProvider', {
-  ProviderID: {
-    type: DataTypes.STRING,
-    primaryKey: true,
+const ServiceProviderSchema = new Schema({
+  providerID: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  Name: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  name: {
+    type: String,
+    required: true,
   },
-  ContactInfo: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  contactInfo: {
+    type: String,
+    required: true,
   },
-  Availability: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  availability: {
+    type: String,
+    required: true,
   },
-  Experience: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  experience: {
+    type: String,
+    required: true,
   },
-  Certifications: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  certifications: {
+    type: String,
+    required: true,
   },
-  Ratings: {
-    type: DataTypes.DECIMAL,
-    allowNull: false,
+  ratings: {
+    type: Number,
+    required: true,
   },
   farmerId: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true, // Ensure one-to-one relationship
+    type: String,
+    required: true,
+    unique: true,
   },
+  // Adding references to related collections
+  addresses: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Address',
+  }],
+  equipment: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Equipment',
+  }],
 }, {
-  tableName: 'ServiceProvider',
+  collection: 'ServiceProvider',
   timestamps: false,
 });
 
-module.exports = ServiceProvider;
+module.exports = mongoose.model('ServiceProvider', ServiceProviderSchema);
