@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { ServiceProvider, Service, Equipment, Address } = require('../models');
+const { ServiceProvider, Service, Equipment, Address } = require('../models'); // Mongoose Models
 const serviceProviderController = require('../controllers/serviceProviderController');
 
 /**
@@ -12,25 +12,20 @@ const serviceProviderController = require('../controllers/serviceProviderControl
  */
 router.get('/', async (req, res) => {
   try {
-    const serviceProviders = await ServiceProvider.findAll({
-      include: [
-        {
-          model: Service,
-          through: { attributes: [] }, 
-          attributes: ['ServiceID', 'ServiceName', 'Description'],
-        },
-        {
-          model: Equipment,
-          attributes: ['EquipmentID', 'Name', 'Type', 'Description'], 
-        },
-        {
-          model: Address,
-          attributes: ['Street', 'City', 'State', 'ZipCode'],
-        },
-      ],
-      order: [['Name', 'ASC']],
-    });
-
+    const serviceProviders = await ServiceProvider.find().populate([
+      {
+        path: 'services',
+        select: 'ServiceID ServiceName Description',
+      },
+      {
+        path: 'equipments',
+        select: 'EquipmentID Name Type Description',
+      },
+      {
+        path: 'address',
+        select: 'Street City State ZipCode',
+      },
+    ]);
     res.json(serviceProviders);
   } catch (error) {
     console.error('Error fetching ServiceProviders:', error);
@@ -45,23 +40,20 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const serviceProvider = await ServiceProvider.findByPk(req.params.id, {
-      include: [
-        {
-          model: Service,
-          through: { attributes: [] },
-          attributes: ['ServiceID', 'ServiceName', 'Description'],
-        },
-        {
-          model: Equipment,
-          attributes: ['EquipmentID', 'Name', 'Type', 'Description', 'Capacity'],
-        },
-        {
-          model: Address,
-          attributes: ['Street', 'City', 'State', 'ZipCode'], 
-        },
-      ],
-    });
+    const serviceProvider = await ServiceProvider.findById(req.params.id).populate([
+      {
+        path: 'services',
+        select: 'ServiceID ServiceName Description',
+      },
+      {
+        path: 'equipments',
+        select: 'EquipmentID Name Type Description Capacity',
+      },
+      {
+        path: 'address',
+        select: 'Street City State ZipCode',
+      },
+    ]);
 
     if (serviceProvider) {
       res.json(serviceProvider);
@@ -77,19 +69,13 @@ router.get('/:id', async (req, res) => {
 // POST create a new ServiceProvider
 router.post('/create', serviceProviderController.createServiceProvider);
 
-
-
 // PUT update ServiceProvider's Equipments
 router.put('/:ProviderID/equipments', serviceProviderController.updateServiceProviderEquipments);
-
-
 
 // PUT add or remove Services for a ServiceProvider
 router.put('/:ProviderID/services', serviceProviderController.updateServiceProviderServices);
 
 // PUT update ServiceProvider along with Equipments and Services
 router.put('/update/:ProviderID', serviceProviderController.updateServiceProvider);
-
-
 
 module.exports = router;
