@@ -1,42 +1,39 @@
 // models/Equipment.js
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+const { v4: uuidv4 } = require('uuid');
 
-const ServiceProvider = require('./ServiceProvider');
-
-const Equipment = sequelize.define('Equipment', {
-  EquipmentID: {
-    type: DataTypes.UUID,
-    primaryKey: true,
-    defaultValue: DataTypes.UUIDV4,
+const EquipmentSchema = new Schema({
+  equipmentID: {
+    type: String,
+    default: uuidv4,
+    unique: true,
+    required: true,
   },
-  Name: {
-    type: DataTypes.STRING,
-    allowNull: false,
+  name: {
+    type: String,
+    required: true,
   },
-  Type: {
-    type: DataTypes.STRING,
-    allowNull: true,
+  type: {
+    type: String,
+    default: null,
   },
-  Description: {
-    type: DataTypes.TEXT,
-    allowNull: true,
+  description: {
+    type: String,
+    default: null,
   },
-  Capacity: {
-    type: DataTypes.STRING,
-    allowNull: true,
+  capacity: {
+    type: String,
+    default: null,
   },
-  OwnedBy: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    references: {
-      model: ServiceProvider,
-      key: 'ProviderID',
-    },
+  ownedBy: {
+    type: Schema.Types.ObjectId,
+    ref: 'ServiceProvider',
+    required: true,
   },
 }, {
-  tableName: 'Equipment',
+  collection: 'Equipment',
   timestamps: false,
 });
 
-module.exports = Equipment;
+module.exports = mongoose.model('Equipment', EquipmentSchema);
