@@ -38,8 +38,8 @@ const connectMongoose = async () => {
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Configure Multer for file uploads (if needed)
-app.use(multer().any()); 
+// // Configure Multer for file uploads (if needed)
+// app.use(multer().any()); 
 
 // CORS Configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS
