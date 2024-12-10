@@ -13,6 +13,24 @@ router.get('/services', async (req, res) => {
   }
 });
 
+
+router.post('/services/upload', async (req, res) => {
+  try {
+    const servicesData = req.body; // The data you are sending to the server
+    
+    // Insert the data into the Service collection
+    const insertedServices = await Service.insertMany(servicesData);
+    
+    res.status(201).json({
+      message: 'Services uploaded successfully!',
+      services: insertedServices
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 // Get a single service by ID
 router.get('/services/:id', async (req, res) => {
   try {
