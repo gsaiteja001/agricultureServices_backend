@@ -77,7 +77,7 @@ app.use('/api/serviceProviders', serviceProvidersRoute);
 app.use('/api/equipment', equipmentRoute);
 app.use('/api/service-requests', serviceRequestsRoutes);
 app.use('/api/crops', cropsRoutes);
-app.use('/api/serviceOfferings', serviceOfferingsRoutes);
+// app.use('/api/serviceOfferings', serviceOfferingsRoutes);
 
 // Define a Root Route for Testing
 app.get('/', (req, res) => {
