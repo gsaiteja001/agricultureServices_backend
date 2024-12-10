@@ -23,6 +23,37 @@ router.get('/', async (req, res) => {
   }
 });
 
+
+/**
+ * @route   POST /api/crops/bulk-upload
+ * @desc    Bulk upload crops data
+ * @access  Public or Protected (depending on your application)
+ */
+router.post('/bulk-upload', async (req, res) => {
+  try {
+    // Assuming the crops data is in the request body
+    const cropsData = req.body;
+
+    // Validate the incoming data (e.g., check if the cropsData is an array)
+    if (!Array.isArray(cropsData)) {
+      return res.status(400).json({ error: 'Data should be an array of crops' });
+    }
+
+    // Insert the data into the database in bulk
+    const result = await Crop.insertMany(cropsData);
+
+    // Respond with the inserted crops
+    res.status(201).json({
+      message: 'Crops uploaded successfully',
+      data: result,
+    });
+  } catch (error) {
+    console.error('Error uploading crops:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 /**
  * @route   GET /api/crops/:id
  * @desc    Get a specific crop with its associated equipment and their service providers
