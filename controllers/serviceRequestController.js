@@ -237,7 +237,18 @@ exports.getServiceRequestsForProvider = async (req, res) => {
  */
 exports.getServiceRequestsForFarmer = async (req, res) => {
   try {
-    const { farmerId, status } = req.query; 
+    const { farmerId, status } = req.query; // e.g., /api/service-requests/farmer?farmerId=farmer123&status=active
+
+    // Validate query parameters
+    if (!farmerId || !status) {
+      return res.status(400).json({ error: 'Both farmerId and status query parameters are required.' });
+    }
+
+    // Validate status value
+    const validStatuses = ['active', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: `Invalid status parameter. Must be one of: ${validStatuses.join(', ')}.` });
+    }
 
     // Fetch Farmer from MongoDB to verify existence
     const farmer = await Farmer.findOne({ farmerId });
@@ -253,25 +264,39 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
       statusFilter = { status: { $in: ['completed', 'canceled'] } };
     }
 
-    // Fetch ServiceRequests
+    // Fetch ServiceRequests based on farmerId and status
     const serviceRequests = await ServiceRequest.find({
-      farmerId: farmerId, // Updated field name
+      farmerId: farmerId,
       ...statusFilter,
-    })
-      .populate({
-        path: 'serviceProvider', // To be addressed in the next section
-        select: 'name contactInfo',
-      })
-      .populate({
-        path: 'service', // To be addressed in the next section
-        select: 'serviceName category',
-      })
-      .sort({ scheduledDate: -1 });
+    }).sort({ scheduledDate: -1 });
 
-    res.status(200).json({ serviceRequests });
+    // If no service requests found, return an empty array
+    if (!serviceRequests.length) {
+      return res.status(200).json({ serviceRequests: [] });
+    }
+
+    // Manually populate serviceProvider and service details using findOne
+    const populatedServiceRequests = await Promise.all(
+      serviceRequests.map(async (request) => {
+        // Fetch Service Provider using serviceProviderID
+        const serviceProvider = await ServiceProvider.findOne({ serviceProviderId: request.serviceProviderID }).select('name contactInfo');
+        
+        // Fetch Service using serviceID
+        const service = await Service.findOne({ serviceId: request.serviceID }).select('serviceName category');
+
+        // Handle cases where serviceProvider or service might not be found
+        return {
+          ...request.toObject(),
+          serviceProvider: serviceProvider || null, 
+          service: service || null, // Assign null if not found
+        };
+      })
+    );
+
+    res.status(200).json({ serviceRequests: populatedServiceRequests });
   } catch (error) {
     console.error('Error fetching Service Requests for Farmer:', error);
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: 'Internal server error.' });
   }
 };
 
