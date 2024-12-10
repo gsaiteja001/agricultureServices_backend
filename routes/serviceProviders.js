@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     const serviceProviders = await ServiceProvider.find().populate([
       {
         path: 'services',
-        select: 'ServiceID ServiceName Description',
+        select: 'serviceID serviceName description',
       },
       {
         path: 'equipments',
