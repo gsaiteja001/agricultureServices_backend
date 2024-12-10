@@ -51,20 +51,22 @@ exports.addServiceRequest = async (req, res) => {
       notes,
     } = req.body;
 
-    // Validate ServiceProvider
+    // Validate ServiceProvider by providerID
     const serviceProvider = await ServiceProvider.findOne({ providerID: serviceProviderID }).session(session);
     if (!serviceProvider) {
       throw new Error('Service Provider not found.');
     }
 
-    // Validate Service
+    // Validate Service by serviceID
     const service = await Service.findOne({ serviceID: serviceId }).session(session);
     if (!service) {
       throw new Error('Service not found.');
     }
 
-    // Create ServiceRequest in MongoDB
-    const requestID = uuidv4(); // Generate unique RequestID
+    // Create a new unique RequestID
+    const requestID = uuidv4();
+
+    // Create and save new ServiceRequest
     const newServiceRequest = new ServiceRequest({
       requestID,
       farmerID: farmerId,
@@ -86,14 +88,13 @@ exports.addServiceRequest = async (req, res) => {
       throw new Error('Farmer not found in MongoDB.');
     }
 
-    // Add to currentServiceRequests
+    // Add this request to the farmer's currentServiceRequests
     farmer.currentServiceRequests.push({
       requestID: newServiceRequest.requestID,
-      serviceID: newServiceRequest.service,
-      serviceProviderID: newServiceRequest.serviceProvider,
+      serviceID: newServiceRequest.service,          // storing ObjectId reference to the Service
+      serviceProviderID: newServiceRequest.serviceProvider, // storing ObjectId reference to the ServiceProvider
       status: newServiceRequest.status,
       scheduledDate: newServiceRequest.scheduledDate,
-      // Add other relevant fields if necessary
     });
 
     await farmer.save({ session });
@@ -102,12 +103,13 @@ exports.addServiceRequest = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
+    // Return success response
     res.status(201).json({
       message: 'Service Request created successfully.',
       serviceRequest: newServiceRequest,
     });
   } catch (error) {
-    // Rollback the transaction in case of error
+    // Rollback on error
     await session.abortTransaction();
     session.endSession();
     console.error('Error adding Service Request:', error);
