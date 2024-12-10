@@ -1,7 +1,11 @@
 // controllers/serviceProviderController.js
 
 const mongoose = require('mongoose');
-const { ServiceProvider, Equipment, Address, Service, farmer } = require('../models');
+const Farmer = require('../models/farmer'); 
+const ServiceProvider = require('../models/ServiceProvider');
+const Equipment = require('../models/Equipment');
+const Address = require('../models/Address');
+const Service = require('../models/Service');
 
 
 
@@ -51,7 +55,7 @@ exports.createServiceProvider = async (req, res) => {
     }
 
     // Check if farmerId exists in MongoDB
-    const farmers = await farmer.findOne({ farmerId }).session(session);
+    const farmers = await Farmer.findOne({ farmerId }).session(session);
     if (!farmers) {
       await session.abortTransaction();
       session.endSession();
