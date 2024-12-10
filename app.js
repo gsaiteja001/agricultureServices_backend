@@ -67,8 +67,8 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const serviceProvidersRoute = require('./routes/serviceProviders');
 const equipmentRoute = require('./routes/equipment');
 const serviceRequestsRoutes = require('./routes/serviceRequests');
-const cropsRoutes = require('./routes/crops'); // Newly added route
-// const serviceOfferingsRoutes = require('./routes/serviceOfferings'); 
+const cropsRoutes = require('./routes/crops'); 
+
 
 // Use Routes
 app.use('/api', serviceRoutes);
@@ -77,7 +77,7 @@ app.use('/api/serviceProviders', serviceProvidersRoute);
 app.use('/api/equipment', equipmentRoute);
 app.use('/api/service-requests', serviceRequestsRoutes);
 app.use('/api/crops', cropsRoutes);
-// app.use('/api/serviceOfferings', serviceOfferingsRoutes);
+
 
 // Define a Root Route for Testing
 app.get('/', (req, res) => {
