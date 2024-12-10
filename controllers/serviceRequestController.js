@@ -239,20 +239,25 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
   try {
     const { farmerId, status } = req.query; // e.g., /api/service-requests/farmer?farmerId=farmer123&status=active
 
+    console.log(`Received request for farmerId: ${farmerId} with status: ${status}`);
+
     // Validate query parameters
     if (!farmerId || !status) {
+      console.log('Missing farmerId or status in query parameters.');
       return res.status(400).json({ error: 'Both farmerId and status query parameters are required.' });
     }
 
     // Validate status value
     const validStatuses = ['active', 'completed'];
     if (!validStatuses.includes(status)) {
+      console.log(`Invalid status parameter: ${status}`);
       return res.status(400).json({ error: `Invalid status parameter. Must be one of: ${validStatuses.join(', ')}.` });
     }
 
     // Fetch Farmer from MongoDB to verify existence
     const farmer = await Farmer.findOne({ farmerId });
     if (!farmer) {
+      console.log(`Farmer not found for farmerId: ${farmerId}`);
       return res.status(404).json({ error: 'Farmer not found.' });
     }
 
@@ -264,14 +269,19 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
       statusFilter = { status: { $in: ['completed', 'canceled'] } };
     }
 
+    console.log(`Status filter applied: ${JSON.stringify(statusFilter)}`);
+
     // Fetch ServiceRequests based on farmerId and status
     const serviceRequests = await ServiceRequest.find({
       farmerId: farmerId,
       ...statusFilter,
     }).sort({ scheduledDate: -1 });
 
+    console.log(`Found ${serviceRequests.length} service requests for farmerId: ${farmerId} with status: ${status}`);
+
     // If no service requests found, return an empty array
     if (!serviceRequests.length) {
+      console.log('No service requests found matching the criteria.');
       return res.status(200).json({ serviceRequests: [] });
     }
 
@@ -283,6 +293,8 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
         
         // Fetch Service using serviceID
         const service = await Service.findOne({ serviceId: request.serviceID }).select('serviceName category');
+
+        console.log(`Populated ServiceProvider: ${serviceProvider ? serviceProvider.serviceProviderId : 'Not Found'}, Service: ${service ? service.serviceId : 'Not Found'}`);
 
         // Handle cases where serviceProvider or service might not be found
         return {
@@ -299,4 +311,3 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 };
-
