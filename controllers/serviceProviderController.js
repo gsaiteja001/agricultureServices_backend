@@ -3,6 +3,26 @@
 const mongoose = require('mongoose');
 const { ServiceProvider, Equipment, Address, Service, farmer } = require('../models');
 
+
+
+/**
+ * Helper function to retrieve Service ObjectIds based on serviceIDs
+ * @param {Array<String>} serviceIDs - Array of serviceID strings
+ * @param {mongoose.ClientSession} session - Mongoose session for transactions
+ * @returns {Array<mongoose.Types.ObjectId>} - Array of Service ObjectIds
+ */
+const getServiceObjectIds = async (serviceIDs, session) => {
+  const services = await Service.find({ serviceID: { $in: serviceIDs } }).session(session);
+  
+  if (services.length !== serviceIDs.length) {
+    const foundServiceIDs = services.map(service => service.serviceID);
+    const notFound = serviceIDs.filter(id => !foundServiceIDs.includes(id));
+    throw new Error(`Services not found for serviceIDs: ${notFound.join(', ')}`);
+  }
+
+  return services.map(service => service._id);
+};
+
 /**
  * Create a new ServiceProvider
  */
@@ -20,7 +40,7 @@ exports.createServiceProvider = async (req, res) => {
       Ratings,
       Addresses, // Array of address objects
       Equipments, // Array of equipment objects
-      ServiceIDs, // Array of service IDs
+      ServiceIDs, // Array of serviceID strings
       farmerId,
     } = req.body;
 
@@ -80,15 +100,17 @@ exports.createServiceProvider = async (req, res) => {
       await Address.insertMany(addressDocs, { session });
     }
 
-    // Associate Services
+    // Associate Services using serviceID
     if (ServiceIDs && ServiceIDs.length > 0) {
+      const serviceObjectIds = await getServiceObjectIds(ServiceIDs, session); // Fetch ObjectIds
+
       await Service.updateMany(
-        { _id: { $in: ServiceIDs } },
+        { _id: { $in: serviceObjectIds } },
         { $addToSet: { serviceProviders: serviceProvider._id } },
         { session }
       );
 
-      serviceProvider.services = ServiceIDs;
+      serviceProvider.services = serviceObjectIds;
       await serviceProvider.save({ session });
     }
 
@@ -108,9 +130,12 @@ exports.createServiceProvider = async (req, res) => {
     console.error('Error creating ServiceProvider:', error);
     await session.abortTransaction();
     session.endSession();
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };
+
+
+
 
 /**
  * Update the Equipments held by a ServiceProvider
@@ -177,26 +202,30 @@ exports.updateServiceProviderServices = async (req, res) => {
       return res.status(404).json({ error: 'ServiceProvider not found' });
     }
 
-    // Add new Services
+    // Add new Services using serviceID
     if (AddServiceIDs && AddServiceIDs.length > 0) {
+      const addServiceObjectIds = await getServiceObjectIds(AddServiceIDs, session); // Fetch ObjectIds
+
       await Service.updateMany(
-        { _id: { $in: AddServiceIDs } },
+        { _id: { $in: addServiceObjectIds } },
         { $addToSet: { serviceProviders: serviceProvider._id } },
         { session }
       );
 
-      serviceProvider.services.addToSet(...AddServiceIDs);
+      serviceProvider.services.addToSet(...addServiceObjectIds);
     }
 
-    // Remove Services
+    // Remove Services using serviceID
     if (RemoveServiceIDs && RemoveServiceIDs.length > 0) {
+      const removeServiceObjectIds = await getServiceObjectIds(RemoveServiceIDs, session); // Fetch ObjectIds
+
       await Service.updateMany(
-        { _id: { $in: RemoveServiceIDs } },
+        { _id: { $in: removeServiceObjectIds } },
         { $pull: { serviceProviders: serviceProvider._id } },
         { session }
       );
 
-      serviceProvider.services.pull(...RemoveServiceIDs);
+      serviceProvider.services.pull(...removeServiceObjectIds);
     }
 
     await serviceProvider.save({ session });
@@ -209,9 +238,10 @@ exports.updateServiceProviderServices = async (req, res) => {
     console.error('Error updating Services:', error);
     await session.abortTransaction();
     session.endSession();
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };
+
 
 /**
  * Update a ServiceProvider along with Equipments and Services
@@ -230,7 +260,7 @@ exports.updateServiceProvider = async (req, res) => {
       Ratings,
       Addresses, // Array of address objects
       Equipments, // Array of equipment objects
-      ServiceIDs, // Array of service IDs
+      ServiceIDs, // Array of serviceID strings
       farmerId,
     } = req.body;
 
@@ -323,40 +353,48 @@ exports.updateServiceProvider = async (req, res) => {
       }
     }
 
-    // Update Services
+    // Update Services using serviceID
     if (ServiceIDs) {
       // Remove existing Service associations not in the new list
-      const currentServiceIDs = serviceProvider.services.map(id => id.toString());
-      const servicesToAdd = ServiceIDs.filter(id => !currentServiceIDs.includes(id));
-      const servicesToRemove = currentServiceIDs.filter(id => !ServiceIDs.includes(id));
+      const currentServiceIDs = await Service.find({ _id: { $in: serviceProvider.services } }).session(session)
+        .select('serviceID').lean();
+      const currentServiceIDStrings = currentServiceIDs.map(s => s.serviceID);
+
+      const servicesToAddIDs = ServiceIDs.filter(id => !currentServiceIDStrings.includes(id));
+      const servicesToRemoveIDs = currentServiceIDStrings.filter(id => !ServiceIDs.includes(id));
 
       // Add new Services
-      if (servicesToAdd.length > 0) {
+      if (servicesToAddIDs.length > 0) {
+        const addServiceObjectIds = await getServiceObjectIds(servicesToAddIDs, session);
+
         await Service.updateMany(
-          { _id: { $in: servicesToAdd } },
+          { _id: { $in: addServiceObjectIds } },
           { $addToSet: { serviceProviders: serviceProvider._id } },
           { session }
         );
 
-        serviceProvider.services.push(...servicesToAdd.map(id => mongoose.Types.ObjectId(id)));
+        serviceProvider.services.push(...addServiceObjectIds);
       }
 
       // Remove old Services
-      if (servicesToRemove.length > 0) {
+      if (servicesToRemoveIDs.length > 0) {
+        const removeServiceObjectIds = await getServiceObjectIds(servicesToRemoveIDs, session);
+
         await Service.updateMany(
-          { _id: { $in: servicesToRemove } },
+          { _id: { $in: removeServiceObjectIds } },
           { $pull: { serviceProviders: serviceProvider._id } },
           { session }
         );
 
         serviceProvider.services = serviceProvider.services.filter(
-          id => !servicesToRemove.includes(id.toString())
+          id => !removeServiceObjectIds.includes(id)
         );
       }
     } else {
       // If no ServiceIDs provided, remove all associations
+      const allServiceObjectIds = serviceProvider.services;
       await Service.updateMany(
-        { serviceProviders: serviceProvider._id },
+        { _id: { $in: allServiceObjectIds } },
         { $pull: { serviceProviders: serviceProvider._id } },
         { session }
       );
@@ -375,9 +413,13 @@ exports.updateServiceProvider = async (req, res) => {
     console.error('Error updating ServiceProvider:', error);
     await session.abortTransaction();
     session.endSession();
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: error.message || 'Internal Server Error' });
   }
 };
+
+
+
+
 
 /**
  * Delete a ServiceProvider
