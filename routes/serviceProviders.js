@@ -34,9 +34,9 @@ router.get('/', async (req, res) => {
  * @desc    Fetch a single ServiceProvider by ID with associated Services, Equipment, and Address
  * @access  Public or Protected (depending on your application)
  */
-router.get('/:id', async (req, res) => {
+router.get('/providerID/:providerID', async (req, res) => {
   try {
-    const serviceProvider = await ServiceProvider.findById(req.params.id).populate([
+    const serviceProvider = await ServiceProvider.findOne({ providerID: req.params.providerID }).populate([
       {
         path: 'services',
         select: 'serviceID serviceName description',
