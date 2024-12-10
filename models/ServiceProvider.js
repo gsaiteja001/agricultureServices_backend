@@ -12,7 +12,7 @@ const ServiceProviderSchema = new Schema({
   certifications: { type: String, required: true },
   ratings: { type: Number, required: true, min: 0, max: 5 },
   farmerId: { type: String, required: true, unique: true },
-  services: [{ type: Schema.Types.ObjectId, ref: 'Service' }], // Many-to-Many
+  services: [{ type: String, ref: 'Service' }], // Many-to-Many
   equipments: [{ type: Schema.Types.ObjectId, ref: 'Equipment' }], // One-to-Many
   addresses: [{ type: Schema.Types.ObjectId, ref: 'Address' }], // One-to-Many
 }, {
