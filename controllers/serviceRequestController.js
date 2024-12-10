@@ -237,7 +237,8 @@ exports.getServiceRequestsForProvider = async (req, res) => {
  */
 exports.getServiceRequestsForFarmer = async (req, res) => {
   try {
-    const { farmerId, status } = req.query; // e.g., /api/service-requests/farmer?farmerId=farmer123&status=active
+    const { farmerId, status } = req.query; 
+    // e.g., /api/service-requests/farmer?farmerId=farmer123&status=active
 
     console.log(`Received request for farmerId: ${farmerId} with status: ${status}`);
 
@@ -254,58 +255,53 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
       return res.status(400).json({ error: `Invalid status parameter. Must be one of: ${validStatuses.join(', ')}.` });
     }
 
-    // Fetch Farmer from MongoDB to verify existence
+    // Fetch Farmer from MongoDB
     const farmer = await Farmer.findOne({ farmerId });
     if (!farmer) {
       console.log(`Farmer not found for farmerId: ${farmerId}`);
       return res.status(404).json({ error: 'Farmer not found.' });
     }
 
-    // Define status filter
-    let statusFilter = {};
+    let requests = [];
     if (status === 'active') {
-      statusFilter = { status: { $in: ['Pending', 'InProgress', 'Assigned'] } };
+      // Filter currentServiceRequests based on active statuses
+      requests = farmer.currentServiceRequests.filter(
+        req => ['Pending', 'InProgress', 'Assigned'].includes(req.status)
+      );
     } else if (status === 'completed') {
-      statusFilter = { status: { $in: ['Completed', 'Canceled'] } };
+      // Filter completedServiceRequests based on completed statuses
+      // Note: schema uses "Cancelled" (double 'l')
+      requests = farmer.completedServiceRequests.filter(
+        req => ['Completed', 'Cancelled'].includes(req.status)
+      );
     }
 
-    console.log(`Status filter applied: ${JSON.stringify(statusFilter)}`);
-
-    // Fetch ServiceRequests based on farmerId and status
-    const serviceRequests = await ServiceRequest.find({
-      farmerId: farmerId,
-      ...statusFilter,
-    }).sort({ scheduledDate: -1 });
-
-    console.log(`Found ${serviceRequests.length} service requests for farmerId: ${farmerId} with status: ${status}`);
-
-    // If no service requests found, return an empty array
-    if (!serviceRequests.length) {
+    if (!requests.length) {
       console.log('No service requests found matching the criteria.');
       return res.status(200).json({ serviceRequests: [] });
     }
 
-    // Manually populate serviceProvider and service details using findOne
-    const populatedServiceRequests = await Promise.all(
-      serviceRequests.map(async (request) => {
-        // Fetch Service Provider using serviceProviderID
-        const serviceProvider = await ServiceProvider.findOne({ serviceProviderId: request.serviceProviderID }).select('name contactInfo');
-        
-        // Fetch Service using serviceID
-        const service = await Service.findOne({ serviceId: request.serviceID }).select('serviceName category');
+    // Sort requests by scheduledDate descending (latest first)
+    requests.sort((a, b) => b.scheduledDate - a.scheduledDate);
 
-        console.log(`Populated ServiceProvider: ${serviceProvider ? serviceProvider.serviceProviderId : 'Not Found'}, Service: ${service ? service.serviceId : 'Not Found'}`);
+    // Optionally populate serviceProvider and service details
+    const populatedRequests = await Promise.all(
+      requests.map(async (request) => {
+        const serviceProvider = await ServiceProvider.findOne({ serviceProviderId: request.serviceProviderID })
+          .select('name contactInfo');
 
-        // Handle cases where serviceProvider or service might not be found
+        const service = await Service.findOne({ serviceId: request.serviceID })
+          .select('serviceName category');
+
         return {
           ...request.toObject(),
-          serviceProvider: serviceProvider || null, 
-          service: service || null, // Assign null if not found
+          serviceProvider: serviceProvider || null,
+          service: service || null,
         };
       })
     );
 
-    res.status(200).json({ serviceRequests: populatedServiceRequests });
+    res.status(200).json({ serviceRequests: populatedRequests });
   } catch (error) {
     console.error('Error fetching Service Requests for Farmer:', error);
     res.status(500).json({ error: 'Internal server error.' });
