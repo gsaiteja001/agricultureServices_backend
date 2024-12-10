@@ -76,7 +76,7 @@ exports.addServiceRequest = async (req, res) => {
       scheduledDate,
       serviceProvider: serviceProvider.providerID,
       service: service.serviceID,
-      status: 'pending',
+      status: 'Pending',
       notes,
     });
 
