@@ -26,6 +26,9 @@ const getServiceObjectIds = async (serviceIDs, session) => {
 /**
  * Create a new ServiceProvider
  */
+/**
+ * Create a new ServiceProvider
+ */
 exports.createServiceProvider = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -44,9 +47,14 @@ exports.createServiceProvider = async (req, res) => {
       farmerId,
     } = req.body;
 
+    // Validate ProviderID
+    if (!ProviderID) {
+      throw new Error('ProviderID is required.');
+    }
+
     // Check if farmerId exists in MongoDB
-    const farmers = await farmer.findOne({ farmerId }).session(session);
-    if (!farmers) {
+    const farmer = await Farmer.findOne({ farmerId }).session(session);
+    if (!farmer) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ error: 'Farmer not found' });
@@ -115,7 +123,7 @@ exports.createServiceProvider = async (req, res) => {
     }
 
     // Update Farmer's ProviderId
-    farmers.providerID = serviceProvider.providerID;
+    farmer.providerID = serviceProvider.providerID;
     await farmer.save({ session });
 
     // Commit the transaction
