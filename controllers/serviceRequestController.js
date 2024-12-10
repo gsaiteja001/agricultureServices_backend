@@ -74,8 +74,8 @@ exports.addServiceRequest = async (req, res) => {
       farmerContactInfo,
       farmerAddress,
       scheduledDate,
-      serviceProvider: serviceProvider._id,
-      service: service._id,
+      serviceProvider: serviceProvider.providerID,
+      service: service.serviceID,
       status: 'pending',
       notes,
     });
