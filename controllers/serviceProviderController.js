@@ -45,8 +45,8 @@ exports.createServiceProvider = async (req, res) => {
     } = req.body;
 
     // Check if farmerId exists in MongoDB
-    const farmer = await farmer.findOne({ farmerId }).session(session);
-    if (!farmer) {
+    const farmers = await farmer.findOne({ farmerId }).session(session);
+    if (!farmers) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ error: 'Farmer not found' });
@@ -115,7 +115,7 @@ exports.createServiceProvider = async (req, res) => {
     }
 
     // Update Farmer's ProviderId
-    farmer.providerID = serviceProvider._id;
+    farmers.providerID = serviceProvider.providerID;
     await farmer.save({ session });
 
     // Commit the transaction
