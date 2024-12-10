@@ -21,10 +21,6 @@ router.get('/', async (req, res) => {
         path: 'equipments',
         select: 'EquipmentID Name Type Description',
       },
-      {
-        path: 'address',
-        select: 'Street City State ZipCode',
-      },
     ]);
     res.json(serviceProviders);
   } catch (error) {
