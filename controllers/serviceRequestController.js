@@ -13,18 +13,96 @@ const { v4: uuidv4 } = require('uuid');
 /**
  * Get All Service Requests
  */
+/**
+ * Get All Service Requests
+ */
 exports.getAllServiceRequests = async (req, res) => {
   try {
-    const serviceRequests = await ServiceRequest.find()
-      .populate({
-        path: 'serviceProvider',
-        select: 'providerID name contactInfo',
-      })
-      .populate({
-        path: 'service',
-        select: 'serviceID serviceName category',
-      })
-      .sort({ scheduledDate: -1 }); // Sort by ScheduledDate descending
+    const serviceRequests = await ServiceRequest.aggregate([
+      // Sort by scheduledDate descending
+      { $sort: { scheduledDate: -1 } },
+      
+      // Lookup for ServiceProvider
+      {
+        $lookup: {
+          from: 'ServiceProvider', // Name of the ServiceProvider collection
+          localField: 'serviceProviderID', // Field in ServiceRequest
+          foreignField: 'providerID', // Field in ServiceProvider
+          as: 'serviceProvider', // Alias for the joined data
+        },
+      },
+      {
+        $unwind: {
+          path: '$serviceProvider',
+          preserveNullAndEmptyArrays: true, // Optional: keep ServiceRequest even if no ServiceProvider found
+        },
+      },
+      {
+        $project: {
+          // Include all ServiceRequest fields
+          requestID: 1,
+          farmerId: 1,
+          farmerName: 1,
+          farmerContactInfo: 1,
+          farmerAddress: 1,
+          scheduledDate: 1,
+          serviceProviderID: 1,
+          serviceID: 1,
+          status: 1,
+          notes: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          
+          // Include selected ServiceProvider fields
+          'serviceProvider.providerID': 1,
+          'serviceProvider.name': 1,
+          'serviceProvider.contactInfo': 1,
+        },
+      },
+      
+      // Lookup for Service
+      {
+        $lookup: {
+          from: 'Service', // Name of the Service collection
+          localField: 'serviceID', // Field in ServiceRequest
+          foreignField: 'serviceID', // Field in Service
+          as: 'service',
+        },
+      },
+      {
+        $unwind: {
+          path: '$service',
+          preserveNullAndEmptyArrays: true, // Optional: keep ServiceRequest even if no Service found
+        },
+      },
+      {
+        $project: {
+          // Include all ServiceRequest fields
+          requestID: 1,
+          farmerId: 1,
+          farmerName: 1,
+          farmerContactInfo: 1,
+          farmerAddress: 1,
+          scheduledDate: 1,
+          serviceProviderID: 1,
+          serviceID: 1,
+          status: 1,
+          notes: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          
+          // Include selected ServiceProvider fields
+          'serviceProvider.providerID': 1,
+          'serviceProvider.name': 1,
+          'serviceProvider.contactInfo': 1,
+          
+          // Include selected Service fields
+          'service.serviceID': 1,
+          'service.serviceName': 1,
+          'service.category': 1,
+        },
+      },
+    ]);
 
     res.status(200).json({ serviceRequests });
   } catch (error) {
@@ -32,6 +110,7 @@ exports.getAllServiceRequests = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 /**
  * Add a new Service Request
