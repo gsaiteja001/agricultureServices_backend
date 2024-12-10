@@ -5,7 +5,7 @@ const Address = require('./Address');
 const Equipment = require('./Equipment');
 const Crop = require('./Crop');
 const ServiceRequest = require('./ServiceRequest');
-const Farmer = require('./Farmer'); // Ensure this model is defined
+const Farmer = require('./farmer'); // Ensure this model is defined
 
 module.exports = {
   ServiceProvider,
