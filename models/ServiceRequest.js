@@ -8,7 +8,7 @@ const ServiceRequestSchema = new Schema({
     required: true,
     unique: true,
   },
-  farmerID: {
+  farmerId: {
     type: String,
     required: true,
   },
