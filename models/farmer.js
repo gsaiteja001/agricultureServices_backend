@@ -425,7 +425,7 @@ const FarmerSchema = new Schema({
     currency: { type: String, default: 'RUPEE', required: false },
   },
   financialStatus: { type: FinancialStatusSchema, required: false },
-   ProviderID: { type: String, required: true, unique: true, trim: true },
+  providerID: { type: String, required: true, unique: true, trim: true },
   availableLandForRent: { type: Boolean, default: false, required: false },
   rentedLandDetails: [
     {
