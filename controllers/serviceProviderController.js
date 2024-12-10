@@ -126,7 +126,7 @@ exports.createServiceProvider = async (req, res) => {
 
     // Update Farmer's ProviderId
     farmers.providerID = serviceProvider.providerID;
-    await farmer.save({ session });
+    await farmers.save({ session });
 
     // Commit the transaction
     await session.commitTransaction();
