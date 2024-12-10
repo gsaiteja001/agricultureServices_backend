@@ -45,7 +45,7 @@ exports.createServiceProvider = async (req, res) => {
     } = req.body;
 
     // Check if farmerId exists in MongoDB
-    const farmer = await Farmer.findOne({ farmerId }).session(session);
+    const farmer = await farmer.findOne({ farmerId }).session(session);
     if (!farmer) {
       await session.abortTransaction();
       session.endSession();
