@@ -264,9 +264,9 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
     // Define status filter
     let statusFilter = {};
     if (status === 'active') {
-      statusFilter = { status: { $in: ['pending', 'inProgress', 'assigned'] } };
+      statusFilter = { status: { $in: ['Pending', 'InProgress', 'Assigned'] } };
     } else if (status === 'completed') {
-      statusFilter = { status: { $in: ['completed', 'canceled'] } };
+      statusFilter = { status: { $in: ['Completed', 'Canceled'] } };
     }
 
     console.log(`Status filter applied: ${JSON.stringify(statusFilter)}`);
