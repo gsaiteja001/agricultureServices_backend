@@ -28,14 +28,12 @@ const ServiceRequestSchema = new Schema({
     type: Date,
     required: true,
   },
-  serviceProvider: {
-    type: Schema.Types.ObjectId,
-    ref: 'ServiceProvider',
+  serviceProviderID: {
+    type: String,
     required: true,
   },
-  service: {
-    type: Schema.Types.ObjectId,
-    ref: 'Service',
+  serviceID: {
+    type: String,
     required: true,
   },
   status: {
