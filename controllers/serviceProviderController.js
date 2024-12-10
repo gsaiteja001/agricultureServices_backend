@@ -52,7 +52,7 @@ exports.createServiceProvider = async (req, res) => {
 
     // Check if farmerId exists in MongoDB
     const farmers = await farmer.findOne({ farmerId }).session(session);
-    if (!farmer) {
+    if (!farmers) {
       await session.abortTransaction();
       session.endSession();
       return res.status(404).json({ error: 'Farmer not found' });
