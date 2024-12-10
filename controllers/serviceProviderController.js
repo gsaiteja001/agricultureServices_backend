@@ -23,9 +23,7 @@ const getServiceObjectIds = async (serviceIDs, session) => {
   return services.map(service => service._id);
 };
 
-/**
- * Create a new ServiceProvider
- */
+
 /**
  * Create a new ServiceProvider
  */
@@ -53,7 +51,7 @@ exports.createServiceProvider = async (req, res) => {
     }
 
     // Check if farmerId exists in MongoDB
-    const farmer = await Farmer.findOne({ farmerId }).session(session);
+    const farmers = await farmer.findOne({ farmerId }).session(session);
     if (!farmer) {
       await session.abortTransaction();
       session.endSession();
@@ -123,7 +121,7 @@ exports.createServiceProvider = async (req, res) => {
     }
 
     // Update Farmer's ProviderId
-    farmer.providerID = serviceProvider.providerID;
+    farmers.providerID = serviceProvider.providerID;
     await farmer.save({ session });
 
     // Commit the transaction
