@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { ServiceProvider, Service, Equipment, Address } = require('../models'); // Mongoose Models
+const { ServiceProvider, Service, Equipment, Address, farmer } = require('../models'); // Mongoose Models
 const serviceProviderController = require('../controllers/serviceProviderController');
 
 /**
