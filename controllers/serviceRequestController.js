@@ -1,10 +1,12 @@
 // controllers/serviceRequestController.js
-const mongoose = require('mongoose');
-const { ServiceRequest, ServiceProvider, Service, Farmer } = require('../models'); // Destructure models
 
+const mongoose = require('mongoose');
+const { ServiceRequest, ServiceProvider, Service, Farmer } = require('../models');
 const { v4: uuidv4 } = require('uuid');
 
-// Get All Service Requests
+/**
+ * Get All Service Requests
+ */
 exports.getAllServiceRequests = async (req, res) => {
   try {
     const serviceRequests = await ServiceRequest.find()
@@ -25,7 +27,9 @@ exports.getAllServiceRequests = async (req, res) => {
   }
 };
 
-// Add a new Service Request
+/**
+ * Add a new Service Request
+ */
 exports.addServiceRequest = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -64,14 +68,14 @@ exports.addServiceRequest = async (req, res) => {
       scheduledDate,
       serviceProvider: serviceProvider._id,
       service: service._id,
-      status: 'Pending',
+      status: 'pending',
       notes,
     });
 
     await newServiceRequest.save({ session });
 
     // Update Farmer's document
-    const farmer = await Farmer.findOne({ farmerId: farmerId }).session(session);
+    const farmer = await Farmer.findOne({ farmerId }).session(session);
     if (!farmer) {
       throw new Error('Farmer not found in MongoDB.');
     }
@@ -105,7 +109,9 @@ exports.addServiceRequest = async (req, res) => {
   }
 };
 
-// Update an existing Service Request
+/**
+ * Update an existing Service Request
+ */
 exports.updateServiceRequest = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -120,7 +126,7 @@ exports.updateServiceRequest = async (req, res) => {
     }
 
     // Update ServiceRequest
-    Object.keys(updateData).forEach((key) => {
+    Object.keys(updateData).forEach(key => {
       serviceRequest[key] = updateData[key];
     });
 
@@ -135,7 +141,7 @@ exports.updateServiceRequest = async (req, res) => {
 
       // Find the service request in currentServiceRequests
       const serviceRequestIndex = farmer.currentServiceRequests.findIndex(
-        (req) => req.requestID === requestId
+        req => req.requestID === requestId
       );
 
       if (serviceRequestIndex === -1) {
@@ -154,6 +160,7 @@ exports.updateServiceRequest = async (req, res) => {
       if (updateData.status.toLowerCase() === 'completed') {
         farmer.completedServiceRequests.push(completedServiceRequest);
       } else if (updateData.status.toLowerCase() === 'canceled') {
+        // Assuming you have a 'returnedServiceRequests' array
         farmer.returnedServiceRequests = farmer.returnedServiceRequests || [];
         farmer.returnedServiceRequests.push(completedServiceRequest);
       }
@@ -178,13 +185,15 @@ exports.updateServiceRequest = async (req, res) => {
   }
 };
 
-// Get active/completed Service Requests for a ServiceProvider
+/**
+ * Get Service Requests for a ServiceProvider based on providerId and status
+ */
 exports.getServiceRequestsForProvider = async (req, res) => {
   try {
-    const { providerID, status } = req.query; // e.g., /api/service-requests/provider?providerId=123&status=active
+    const { providerId, status } = req.query; // e.g., /api/service-requests/provider?providerId=123&status=active
 
     // Validate ServiceProvider
-    const serviceProvider = await ServiceProvider.findOne({ providerID: providerID });
+    const serviceProvider = await ServiceProvider.findOne({ providerID: providerId });
     if (!serviceProvider) {
       return res.status(404).json({ error: 'Service Provider not found.' });
     }
@@ -215,13 +224,15 @@ exports.getServiceRequestsForProvider = async (req, res) => {
   }
 };
 
-// Get active/completed Service Requests raised by a Farmer
+/**
+ * Get Service Requests for a Farmer based on farmerId and status
+ */
 exports.getServiceRequestsForFarmer = async (req, res) => {
   try {
     const { farmerId, status } = req.query; // e.g., /api/service-requests/farmer?farmerId=farmer123&status=active
 
     // Fetch Farmer from MongoDB to verify existence
-    const farmer = await Farmer.findOne({ farmerId: farmerId });
+    const farmer = await Farmer.findOne({ farmerId });
     if (!farmer) {
       return res.status(404).json({ error: 'Farmer not found.' });
     }
@@ -229,9 +240,9 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
     // Define status filter
     let statusFilter = {};
     if (status === 'active') {
-      statusFilter = { status: { $in: ['Pending', 'InProgress', 'Assigned'] } };
+      statusFilter = { status: { $in: ['pending', 'inProgress', 'assigned'] } };
     } else if (status === 'completed') {
-      statusFilter = { status: { $in: ['Completed', 'Canceled'] } };
+      statusFilter = { status: { $in: ['completed', 'canceled'] } };
     }
 
     // Fetch ServiceRequests
@@ -255,3 +266,4 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
