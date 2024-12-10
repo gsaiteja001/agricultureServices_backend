@@ -237,7 +237,7 @@ exports.getServiceRequestsForProvider = async (req, res) => {
  */
 exports.getServiceRequestsForFarmer = async (req, res) => {
   try {
-    const { farmerId, status } = req.query; // e.g., /api/service-requests/farmer?farmerId=farmer123&status=active
+    const { farmerId, status } = req.query; 
 
     // Fetch Farmer from MongoDB to verify existence
     const farmer = await Farmer.findOne({ farmerId });
@@ -255,15 +255,15 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
 
     // Fetch ServiceRequests
     const serviceRequests = await ServiceRequest.find({
-      farmerID: farmerId,
+      farmerId: farmerId, // Updated field name
       ...statusFilter,
     })
       .populate({
-        path: 'serviceProvider',
+        path: 'serviceProvider', // To be addressed in the next section
         select: 'name contactInfo',
       })
       .populate({
-        path: 'service',
+        path: 'service', // To be addressed in the next section
         select: 'serviceName category',
       })
       .sort({ scheduledDate: -1 });
