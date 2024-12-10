@@ -39,16 +39,13 @@ router.get('/:id', async (req, res) => {
     const serviceProvider = await ServiceProvider.findById(req.params.id).populate([
       {
         path: 'services',
-        select: 'ServiceID ServiceName Description',
+        select: 'serviceID serviceName description',
       },
       {
         path: 'equipments',
         select: 'EquipmentID Name Type Description Capacity',
       },
-      {
-        path: 'address',
-        select: 'Street City State ZipCode',
-      },
+
     ]);
 
     if (serviceProvider) {
