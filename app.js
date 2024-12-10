@@ -68,7 +68,7 @@ const serviceProvidersRoute = require('./routes/serviceProviders');
 const equipmentRoute = require('./routes/equipment');
 const serviceRequestsRoutes = require('./routes/serviceRequests');
 const cropsRoutes = require('./routes/crops'); // Newly added route
-const serviceOfferingsRoutes = require('./routes/serviceOfferings'); 
+// const serviceOfferingsRoutes = require('./routes/serviceOfferings'); 
 
 // Use Routes
 app.use('/api', serviceRoutes);
