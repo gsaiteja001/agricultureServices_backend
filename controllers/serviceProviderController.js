@@ -1,7 +1,7 @@
 // controllers/serviceProviderController.js
 
 const mongoose = require('mongoose');
-const { ServiceProvider, Equipment, Address, Service, Farmer } = require('../models');
+const { ServiceProvider, Equipment, Address, Service, farmer } = require('../models');
 
 /**
  * Create a new ServiceProvider
