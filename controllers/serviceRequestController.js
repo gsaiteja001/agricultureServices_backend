@@ -1,7 +1,13 @@
 // controllers/serviceRequestController.js
 
 const mongoose = require('mongoose');
-const { ServiceRequest, ServiceProvider, Service, Farmer } = require('../models');
+
+const Farmer = require('../models/farmer'); 
+const ServiceProvider = require('../models/ServiceProvider');
+const Equipment = require('../models/Equipment');
+const Address = require('../models/Address');
+const Service = require('../models/Service');
+const ServiceRequest = require('../models/ServiceRequest');
 const { v4: uuidv4 } = require('uuid');
 
 /**
