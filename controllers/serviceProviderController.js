@@ -1,8 +1,11 @@
 // controllers/serviceProviderController.js
-const mongoose = require('mongoose');
-const { ServiceProvider, Equipment, Address, Service, Farmer } = require('../models'); // Destructure models
 
-// Create a new ServiceProvider
+const mongoose = require('mongoose');
+const { ServiceProvider, Equipment, Address, Service, Farmer } = require('../models');
+
+/**
+ * Create a new ServiceProvider
+ */
 exports.createServiceProvider = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -22,7 +25,7 @@ exports.createServiceProvider = async (req, res) => {
     } = req.body;
 
     // Check if farmerId exists in MongoDB
-    const farmer = await Farmer.findOne({ farmerId: farmerId }).session(session);
+    const farmer = await Farmer.findOne({ farmerId }).session(session);
     if (!farmer) {
       await session.abortTransaction();
       session.endSession();
@@ -30,7 +33,7 @@ exports.createServiceProvider = async (req, res) => {
     }
 
     // Check for duplicate EquipmentIDs
-    const equipmentIDs = Equipments.map((eq) => eq.EquipmentID).filter(Boolean);
+    const equipmentIDs = Equipments.map(eq => eq.EquipmentID).filter(Boolean);
     const uniqueEquipmentIDs = new Set(equipmentIDs);
     if (equipmentIDs.length !== uniqueEquipmentIDs.size) {
       throw new Error('Duplicate EquipmentID detected in Equipments array.');
@@ -52,13 +55,13 @@ exports.createServiceProvider = async (req, res) => {
 
     // Associate Equipments
     if (Equipments && Equipments.length > 0) {
-      const equipmentDocs = Equipments.map((equipment) => ({
+      const equipmentDocs = Equipments.map(equipment => ({
         equipmentID: equipment.EquipmentID || undefined, // Let Mongoose generate if undefined
         name: equipment.Name,
         type: equipment.Type,
         description: equipment.Description,
         capacity: equipment.Capacity,
-        ownedBy: serviceProvider._id,
+        serviceProvider: serviceProvider._id,
       }));
 
       await Equipment.insertMany(equipmentDocs, { session });
@@ -66,7 +69,7 @@ exports.createServiceProvider = async (req, res) => {
 
     // Associate Addresses
     if (Addresses && Addresses.length > 0) {
-      const addressDocs = Addresses.map((address) => ({
+      const addressDocs = Addresses.map(address => ({
         provider: serviceProvider._id,
         street: address.Street,
         city: address.City,
@@ -109,7 +112,9 @@ exports.createServiceProvider = async (req, res) => {
   }
 };
 
-// Update the Equipments held by a ServiceProvider
+/**
+ * Update the Equipments held by a ServiceProvider
+ */
 exports.updateServiceProviderEquipments = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -126,17 +131,17 @@ exports.updateServiceProviderEquipments = async (req, res) => {
     }
 
     // Remove existing Equipments
-    await Equipment.deleteMany({ ownedBy: serviceProvider._id }, { session });
+    await Equipment.deleteMany({ serviceProvider: serviceProvider._id }, { session });
 
     // Add new Equipments
     if (Equipments && Equipments.length > 0) {
-      const equipmentDocs = Equipments.map((equipment) => ({
+      const equipmentDocs = Equipments.map(equipment => ({
         equipmentID: equipment.EquipmentID || undefined, // Let Mongoose generate if undefined
         name: equipment.Name,
         type: equipment.Type,
         description: equipment.Description,
         capacity: equipment.Capacity,
-        ownedBy: serviceProvider._id,
+        serviceProvider: serviceProvider._id,
       }));
 
       await Equipment.insertMany(equipmentDocs, { session });
@@ -154,7 +159,9 @@ exports.updateServiceProviderEquipments = async (req, res) => {
   }
 };
 
-// Add or remove multiple Services for a ServiceProvider
+/**
+ * Add or remove multiple Services for a ServiceProvider
+ */
 exports.updateServiceProviderServices = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -206,7 +213,9 @@ exports.updateServiceProviderServices = async (req, res) => {
   }
 };
 
-// Update a ServiceProvider along with Equipments and Services
+/**
+ * Update a ServiceProvider along with Equipments and Services
+ */
 exports.updateServiceProvider = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -234,13 +243,13 @@ exports.updateServiceProvider = async (req, res) => {
     }
 
     // Update basic details
-    serviceProvider.name = Name || serviceProvider.name;
-    serviceProvider.contactInfo = ContactInfo || serviceProvider.contactInfo;
-    serviceProvider.availability = Availability || serviceProvider.availability;
-    serviceProvider.experience = Experience || serviceProvider.experience;
-    serviceProvider.certifications = Certifications || serviceProvider.certifications;
-    serviceProvider.ratings = Ratings !== undefined ? Ratings : serviceProvider.ratings;
-    serviceProvider.farmerId = farmerId || serviceProvider.farmerId;
+    if (Name !== undefined) serviceProvider.name = Name;
+    if (ContactInfo !== undefined) serviceProvider.contactInfo = ContactInfo;
+    if (Availability !== undefined) serviceProvider.availability = Availability;
+    if (Experience !== undefined) serviceProvider.experience = Experience;
+    if (Certifications !== undefined) serviceProvider.certifications = Certifications;
+    if (Ratings !== undefined) serviceProvider.ratings = Ratings;
+    if (farmerId !== undefined) serviceProvider.farmerId = farmerId;
 
     // Update Addresses
     if (Addresses) {
@@ -248,7 +257,7 @@ exports.updateServiceProvider = async (req, res) => {
       await Address.deleteMany({ provider: serviceProvider._id }, { session });
 
       // Create new Addresses
-      const addressDocs = Addresses.map((address) => ({
+      const addressDocs = Addresses.map(address => ({
         provider: serviceProvider._id,
         street: address.Street,
         city: address.City,
@@ -262,24 +271,24 @@ exports.updateServiceProvider = async (req, res) => {
     // Update Equipments
     if (Equipments) {
       // Fetch existing equipments for the Provider
-      const existingEquipments = await Equipment.find({ ownedBy: serviceProvider._id }).session(session);
+      const existingEquipments = await Equipment.find({ serviceProvider: serviceProvider._id }).session(session);
       const existingEquipmentMap = {};
-      existingEquipments.forEach((eq) => {
+      existingEquipments.forEach(eq => {
         existingEquipmentMap[eq.equipmentID] = eq;
       });
 
       // IDs of equipments sent in the request
       const incomingEquipmentIDs = Equipments
-        .filter((eq) => eq.EquipmentID)
-        .map((eq) => eq.EquipmentID);
+        .filter(eq => eq.EquipmentID)
+        .map(eq => eq.EquipmentID);
 
       // Delete equipments that are not in the incoming request
       const equipmentsToDelete = existingEquipments.filter(
-        (eq) => !incomingEquipmentIDs.includes(eq.equipmentID)
+        eq => !incomingEquipmentIDs.includes(eq.equipmentID)
       );
 
       if (equipmentsToDelete.length > 0) {
-        const deleteIDs = equipmentsToDelete.map((eq) => eq.equipmentID);
+        const deleteIDs = equipmentsToDelete.map(eq => eq.equipmentID);
         await Equipment.deleteMany({ equipmentID: { $in: deleteIDs } }, { session });
       }
 
@@ -294,7 +303,7 @@ exports.updateServiceProvider = async (req, res) => {
               type: equipment.Type || existingEquipmentMap[equipment.EquipmentID].type,
               description: equipment.Description || existingEquipmentMap[equipment.EquipmentID].description,
               capacity: equipment.Capacity || existingEquipmentMap[equipment.EquipmentID].capacity,
-              ownedBy: serviceProvider._id,
+              serviceProvider: serviceProvider._id,
             },
             { session }
           );
@@ -306,7 +315,7 @@ exports.updateServiceProvider = async (req, res) => {
             type: equipment.Type,
             description: equipment.Description,
             capacity: equipment.Capacity,
-            ownedBy: serviceProvider._id,
+            serviceProvider: serviceProvider._id,
           });
 
           await newEquipment.save({ session });
@@ -317,9 +326,9 @@ exports.updateServiceProvider = async (req, res) => {
     // Update Services
     if (ServiceIDs) {
       // Remove existing Service associations not in the new list
-      const currentServiceIDs = serviceProvider.services.map((id) => id.toString());
-      const servicesToAdd = ServiceIDs.filter((id) => !currentServiceIDs.includes(id));
-      const servicesToRemove = currentServiceIDs.filter((id) => !ServiceIDs.includes(id));
+      const currentServiceIDs = serviceProvider.services.map(id => id.toString());
+      const servicesToAdd = ServiceIDs.filter(id => !currentServiceIDs.includes(id));
+      const servicesToRemove = currentServiceIDs.filter(id => !ServiceIDs.includes(id));
 
       // Add new Services
       if (servicesToAdd.length > 0) {
@@ -329,7 +338,7 @@ exports.updateServiceProvider = async (req, res) => {
           { session }
         );
 
-        serviceProvider.services.push(...servicesToAdd.map((id) => mongoose.Types.ObjectId(id)));
+        serviceProvider.services.push(...servicesToAdd.map(id => mongoose.Types.ObjectId(id)));
       }
 
       // Remove old Services
@@ -341,7 +350,7 @@ exports.updateServiceProvider = async (req, res) => {
         );
 
         serviceProvider.services = serviceProvider.services.filter(
-          (id) => !servicesToRemove.includes(id.toString())
+          id => !servicesToRemove.includes(id.toString())
         );
       }
     } else {
@@ -370,7 +379,9 @@ exports.updateServiceProvider = async (req, res) => {
   }
 };
 
-// Delete a ServiceProvider
+/**
+ * Delete a ServiceProvider
+ */
 exports.deleteServiceProvider = async (req, res) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -389,7 +400,7 @@ exports.deleteServiceProvider = async (req, res) => {
     await Address.deleteMany({ provider: serviceProvider._id }, { session });
 
     // Delete associated Equipments
-    await Equipment.deleteMany({ ownedBy: serviceProvider._id }, { session });
+    await Equipment.deleteMany({ serviceProvider: serviceProvider._id }, { session });
 
     // Remove associations with Services
     await Service.updateMany(
