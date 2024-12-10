@@ -63,7 +63,7 @@ app.use(cors({
 
 // Import Routes
 const serviceRoutes = require('./routes/serviceRoutes');
-const dashboardRoutes = require('./routes/dashboardRoutes'); 
+
 const serviceProvidersRoute = require('./routes/serviceProviders');
 const equipmentRoute = require('./routes/equipment');
 const serviceRequestsRoutes = require('./routes/serviceRequests');
@@ -72,7 +72,7 @@ const cropsRoutes = require('./routes/crops');
 
 // Use Routes
 app.use('/api', serviceRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+
 app.use('/api/serviceProviders', serviceProvidersRoute);
 app.use('/api/equipment', equipmentRoute);
 app.use('/api/service-requests', serviceRequestsRoutes);
