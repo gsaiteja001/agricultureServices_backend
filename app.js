@@ -44,7 +44,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // CORS Configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000', 'http://localhost:3001','https://kisan-admin-dmngu3ijc-saiteja1911s-projects.vercel.app','https://kisan-admin-ooxoefs84-saiteja1911s-projects.vercel.app/services'];
+  : ['http://localhost:3000', 'http://localhost:3001','https://kisan-admin-dmngu3ijc-saiteja1911s-projects.vercel.app','https://kisan-admin-ooxoefs84-saiteja1911s-projects.vercel.app'];
 
 app.use(cors({
   origin: function (origin, callback) {
