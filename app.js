@@ -41,25 +41,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // // Configure Multer for file uploads (if needed)
 // app.use(multer().any()); 
 
-// CORS Configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS
-  ? process.env.ALLOWED_ORIGINS.split(',')
-  : ['http://localhost:3000','https://kisan-admin-ooxoefs84-saiteja1911s-projects.vercel.app','https://kisan-admin-p67b8pdw6-saiteja1911s-projects.vercel.app'];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: false,
+  origin: '*'
 }));
+
+// CORS Configuration
+// const allowedOrigins = process.env.ALLOWED_ORIGINS
+//   ? process.env.ALLOWED_ORIGINS.split(',')
+//   : ['http://localhost:3000','https://kisan-admin-ooxoefs84-saiteja1911s-projects.vercel.app','https://kisan-admin-p67b8pdw6-saiteja1911s-projects.vercel.app'];
+
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     // Allow requests with no origin (like mobile apps or curl requests)
+//     if (!origin) return callback(null, true);
+//     if (allowedOrigins.indexOf(origin) === -1) {
+//       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+//       return callback(new Error(msg), false);
+//     }
+//     return callback(null, true);
+//   },
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+//   credentials: false,
+// }));
 
 // Import Routes
 const serviceRoutes = require('./routes/serviceRoutes');
