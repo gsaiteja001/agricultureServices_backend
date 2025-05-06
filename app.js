@@ -13,10 +13,11 @@ const jwt = require('jsonwebtoken');
 
 const { body, validationResult } = require('express-validator'); 
 
+const serviceCenterRoutes = require('./routes/serviceCenter');
 const app = express();
 
 // Environment Variables
-const PORT = process.env.PORT || 8086;
+const PORT = process.env.PORT || 8090;
 const mongo_uri = process.env.MONGO_URI || "mongodb+srv://teja:teja@cluster0.bgdbs80.mongodb.net/kissanfarm?retryWrites=true&w=majority&appName=Cluster0";
 
 // Connect to MongoDB
@@ -37,34 +38,15 @@ const connectMongoose = async () => {
 // Middlewares
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors());
+
+
 
 // // Configure Multer for file uploads (if needed)
 // app.use(multer().any()); 
 
 
-app.use(cors({
-  origin: '*'
-}));
 
-// CORS Configuration
-// const allowedOrigins = process.env.ALLOWED_ORIGINS
-//   ? process.env.ALLOWED_ORIGINS.split(',')
-//   : ['http://localhost:3000','https://kisan-admin-ooxoefs84-saiteja1911s-projects.vercel.app','https://kisan-admin-p67b8pdw6-saiteja1911s-projects.vercel.app'];
-
-// app.use(cors({
-//   origin: function (origin, callback) {
-//     // Allow requests with no origin (like mobile apps or curl requests)
-//     if (!origin) return callback(null, true);
-//     if (allowedOrigins.indexOf(origin) === -1) {
-//       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-//       return callback(new Error(msg), false);
-//     }
-//     return callback(null, true);
-//   },
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-//   credentials: false,
-// }));
 
 // Import Routes
 const serviceRoutes = require('./routes/serviceRoutes');
@@ -82,6 +64,7 @@ app.use('/api/serviceProviders', serviceProvidersRoute);
 app.use('/api/equipment', equipmentRoute);
 app.use('/api/service-requests', serviceRequestsRoutes);
 app.use('/api/crops', cropsRoutes);
+app.use('/api/service-centers', serviceCenterRoutes);
 
 
 // Define a Root Route for Testing

@@ -31,10 +31,10 @@ router.post('/services/upload', async (req, res) => {
 });
 
 
-// Get a single service by ID
+// Get a single service by serviceId
 router.get('/services/:id', async (req, res) => {
   try {
-    const service = await Service.findById(req.params.id);
+    const service = await Service.findOne({ serviceID: req.params.id });
     if (service) {
       res.json(service);
     } else {

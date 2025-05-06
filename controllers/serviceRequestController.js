@@ -386,3 +386,23 @@ exports.getServiceRequestsForFarmer = async (req, res) => {
     res.status(500).json({ error: 'Internal server error.' });
   }
 };
+
+
+/**
+ * Get Service Request by RequestID
+ */
+exports.getServiceRequestById = async (req, res) => {
+  try {
+    const { requestId } = req.params;
+    // Query by the custom 'requestID' field
+    const serviceRequest = await ServiceRequest.findOne({ requestID: requestId });
+    if (serviceRequest) {
+      res.status(200).json({ serviceRequest });
+    } else {
+      res.status(404).json({ error: 'Service Request not found.' });
+    }
+  } catch (error) {
+    console.error('Error fetching Service Request by ID:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
