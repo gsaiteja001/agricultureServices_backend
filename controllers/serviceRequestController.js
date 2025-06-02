@@ -163,23 +163,25 @@ exports.addServiceRequest = async (req, res) => {
 
     await newServiceRequest.save({ session });
 
-    // Update Farmer's document
-    const farmer = await Farmer.findOne({ farmerId }).session(session);
-    if (!farmer) {
-      throw new Error('Farmer not found in MongoDB.');
-    }
-
-    // Add this request to the farmer's currentServiceRequests
-    farmer.currentServiceRequests.push({
-      requestID: newServiceRequest.requestID,
-      serviceID: newServiceRequest.serviceID,          // storing ObjectId reference to the Service
-      serviceProviderID: newServiceRequest.serviceProviderID, // storing ObjectId reference to the ServiceProvider
-      status: newServiceRequest.status,
-      scheduledDate: newServiceRequest.scheduledDate,
-    });
-
-    await farmer.save({ session });
-
+    const updateResult = await Farmer.updateOne(
+         { farmerId: farmerId },
+         {
+           $push: {
+             currentServiceRequests: {
+               requestID:        newServiceRequest.requestID,
+               serviceID:        newServiceRequest.serviceID,
+               serviceProviderID:newServiceRequest.serviceProviderID,
+               status:           newServiceRequest.status,
+               scheduledDate:    newServiceRequest.scheduledDate,
+             }
+           }
+         },
+         { session }
+       );
+       if (updateResult.matchedCount === 0) {
+         throw new Error('Farmer not found in MongoDB.');
+       }
+       
     // Commit the transaction
     await session.commitTransaction();
     session.endSession();
