@@ -10,6 +10,8 @@ const Service = require('../models/Service');
 const ServiceRequest = require('../models/ServiceRequest');
 const { v4: uuidv4 } = require('uuid');
 
+const generateNumericId = require('../utils/generateNumericId');
+
 /**
  * Get All Service Requests
  */
@@ -120,15 +122,15 @@ exports.addServiceRequest = async (req, res) => {
   session.startTransaction();
   try {
     const {
-      farmerId,
-      farmerName,
-      farmerContactInfo,
-      farmerAddress,
-      scheduledDate,
-      serviceProviderID,
-      serviceId,
-      notes,
-    } = req.body;
+     farmerId,
+     farmerName,
+     farmerContactInfo,
+     farmerAddress,
+     scheduledDate,
+     serviceProviderID,
+     serviceID,
+     notes
+   } = req.body;
 
     // Validate ServiceProvider by providerID
     const serviceProvider = await ServiceProvider.findOne({ providerID: serviceProviderID }).session(session);
@@ -137,18 +139,18 @@ exports.addServiceRequest = async (req, res) => {
     }
 
     // Validate Service by serviceID
-    const service = await Service.findOne({ serviceID: serviceId }).session(session);
+    const service = await Service.findOne({ serviceID: serviceID }).session(session);
     if (!service) {
       throw new Error('Service not found.');
     }
 
     // Create a new unique RequestID
-    const requestID = uuidv4();
+    const requestID = generateNumericId();
 
     // Create and save new ServiceRequest
     const newServiceRequest = new ServiceRequest({
       requestID,
-      farmerID: farmerId,
+      farmerId: farmerId,
       farmerName,
       farmerContactInfo,
       farmerAddress,
@@ -170,8 +172,8 @@ exports.addServiceRequest = async (req, res) => {
     // Add this request to the farmer's currentServiceRequests
     farmer.currentServiceRequests.push({
       requestID: newServiceRequest.requestID,
-      serviceID: newServiceRequest.service,          // storing ObjectId reference to the Service
-      serviceProviderID: newServiceRequest.serviceProvider, // storing ObjectId reference to the ServiceProvider
+      serviceID: newServiceRequest.serviceID,          // storing ObjectId reference to the Service
+      serviceProviderID: newServiceRequest.serviceProviderID, // storing ObjectId reference to the ServiceProvider
       status: newServiceRequest.status,
       scheduledDate: newServiceRequest.scheduledDate,
     });
